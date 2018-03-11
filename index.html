@@ -101,16 +101,33 @@
     </xml> -->
 
     <xml id="demo" style="display: none">
-        <block type="controls_if" id="mf0;NO5)y4T;rNl0E_(*" x="42" y="148">
-            <mutation elseif="1"></mutation>
+        <block type="controls_if" id="mf0;NO5)y4T;rNl0E_(*" x="-4" y="118">
             <value name="IF0">
                 <block type="logic_compare" id="hJ{=$Y%b8|H[x^;^yWp;">
                     <field name="OP">LT</field>
                     <value name="A">
-                        <block type="my_x" id="d{CKYNVN/c~$Wuqm[gQn"></block>
+                        <block type="ball_x" id="xDq2d[?I]f1qMRs+A-0f"></block>
                     </value>
                     <value name="B">
-                        <block type="enemy_x" id="jS2HfHsnw-P]=?NGDdk#"></block>
+                        <block type="math_arithmetic" id="FqAfUGSZ7NG|fiu|M[4S">
+                            <field name="OP">ADD</field>
+                            <value name="A">
+                                <block type="my_x" id="d{CKYNVN/c~$Wuqm[gQn"></block>
+                            </value>
+                            <value name="B">
+                                <block type="math_arithmetic" id="?(5Cs4u7$6hwuQM}60EQ">
+                                    <field name="OP">DIVIDE</field>
+                                    <value name="A">
+                                        <block type="board_length" id="bn{,5BWHaMWzTUXuEtQ:"></block>
+                                    </value>
+                                    <value name="B">
+                                        <block type="math_number" id="6z++2W)/NnsMjAfX*[:_">
+                                            <field name="NUM">2</field>
+                                        </block>
+                                    </value>
+                                </block>
+                            </value>
+                        </block>
                     </value>
                 </block>
             </value>
@@ -118,36 +135,16 @@
                 <block type="return" id="PwSq8Vj6ZTv9|/8bejg/">
                     <value name="VALUE">
                         <block type="math_number" id="9|%YxuFC*5WFQM2sKv~#">
-                            <field name="NUM">1</field>
-                        </block>
-                    </value>
-                </block>
-            </statement>
-            <value name="IF1">
-                <block type="logic_compare" id="CN;l._[B*JS+aD6A)9FZ">
-                    <field name="OP">GT</field>
-                    <value name="A">
-                        <block type="my_x" id="}a`C$8|IUA}LmW`$`@86"></block>
-                    </value>
-                    <value name="B">
-                        <block type="enemy_y" id="nQ4hs79;+XhY+-_d-+*q"></block>
-                    </value>
-                </block>
-            </value>
-            <statement name="DO1">
-                <block type="return" id="OLrJGYdXjPm7Vp8(:Lx+">
-                    <value name="VALUE">
-                        <block type="math_number" id="dzsOlqCI_x]p{*f8##!h">
                             <field name="NUM">-1</field>
                         </block>
                     </value>
                 </block>
             </statement>
             <next>
-                <block type="return" id="vPomOp/B/#(QaV7.z|ZS">
+                <block type="return" id="OLrJGYdXjPm7Vp8(:Lx+">
                     <value name="VALUE">
-                        <block type="math_number" id="KHw8G(@T/jo}tk4xp^#~">
-                            <field name="NUM">0</field>
+                        <block type="math_number" id="dzsOlqCI_x]p{*f8##!h">
+                            <field name="NUM">1</field>
                         </block>
                     </value>
                 </block>

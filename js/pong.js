@@ -183,7 +183,7 @@
         }
         let res = parseFloat(fn(aiPack));
         if (isNaN(res)) res = 0;
-        if (Math.abs(res) > 1) res = 0;
+        if (Math.abs(res) > 1) res = parseInt(res / Math.abs(res));
         ob.setVelocityX(res * 300);
     }
 
