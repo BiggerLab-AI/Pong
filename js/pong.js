@@ -179,6 +179,7 @@
             "player": [player.body.x, player.body.y],
             "enemy":  [enemy.body.x, enemy.body.y],
             "board":  player.width,
+            "vol":    vol
         }
         let res = parseFloat(fn(aiPack));
         if (isNaN(res)) res = 0;
@@ -245,13 +246,15 @@
     editor.setTheme("ace/theme/twilight");
     editor.setValue(`
     /**
-     * There are 4 objects in pack
+     * There are 5 objects in pack
      * 
      * ball, enemy, player are lists with 2 elements:
      *  - pack.ball[0] means the x axis of the ball
      *  - pack.ball[1] means the y axis of the ball
      * board indicates the length of player's board:
      *  - pack.board
+     * vol indicates the vertical velocity of the ball:
+     *  - pack.vol
      * 
      * The return value should between -1 and 1, deciding the horizontal velocity of player's board:
      *  - return -1    means to scroll left with full spead
