@@ -241,14 +241,24 @@
     });
     editor.setTheme("ace/theme/twilight");
     editor.setValue(`function (pack) {
-        if (pack.ball[0] < pack.enemy[0]) return -1;
-        else if (pack.ball[0] > pack.enemy[0] + pack.board) return 1;
+        if (pack.ball[0] < pack.player[0]) return -1;
+        else if (pack.ball[0] > pack.player[0] + pack.board) return 1;
         else return 0;
     }
 
     /**
      * There are 4 objects in pack
      * 
+     * ball, enemy, player are lists with 2 elements:
+     *  - pack.ball[0] means the x axis of the ball
+     *  - pack.ball[1] means the y axis of the ball
+     * board indicates the length of player's board:
+     *  - pack.board
+     * 
+     * The return value should between -1 and 1, deciding the horizontal velocity of player's board:
+     *  - return -1    means to scroll left with full spead
+     *  - return 0     means to stop
+     *  - return 0.5   means to scroll right with half spead
      */
     `);
 
