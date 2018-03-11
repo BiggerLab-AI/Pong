@@ -1,0 +1,39 @@
+body {
+    margin: 0;
+}
+.container {
+    display: inline-block;
+    margin-top: 10px;
+    width: 100%;
+}
+.container > div {
+    display: inline-block;
+}
+#viewer {
+    margin: 0;
+    padding-top: 5px;
+    padding-left: 5px;
+    height: 640px;
+}
+#editor, #blockly {
+    width: calc(100% - 375px);
+    height: 640px;
+    display: none;
+}
+#editor.show, #blockly.show {
+    display: inline-block;
+}
+.submit {
+    position: fixed;
+    right: 20px;
+    top: 30px;
+    padding: 10px 30px;
+    background: #333;
+    border: none;
+    color: white;
+    transition: .3s ease;
+    cursor: pointer;
+}
+.submit:hover {
+    opacity: .6;
+}
