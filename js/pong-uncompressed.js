@@ -150,7 +150,7 @@ Blockly.JavaScript['ball_y'] = function(block) {
 };
 
 Blockly.JavaScript['ball_speed'] = function(block) {
-    return ['pack.vol', Blockly.JavaScript.ORDER_MEMBER];
+    return ['pack.speed[1]', Blockly.JavaScript.ORDER_MEMBER];
 };
 
 Blockly.JavaScript['board_length'] = function(block) {

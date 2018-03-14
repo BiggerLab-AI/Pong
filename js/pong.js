@@ -1,7 +1,27 @@
 (function() {
-    var SCALE = 40; // Scaling of the game, default is 40
-    var ISC   = 2;  // Pixel scaling, default 2 for chrome
-    var VERBOSE = false; // Whether to print out debug information in console
+
+    /**
+     * Scaling of the game
+     * for the game size is to be
+     * (16 * SCALE) x (9 * SCALE)
+     */
+    var SCALE = 40;
+
+    /**
+     * Scaling for retina screen
+     * Especially for chrome
+     * default value is 2
+     */
+    var ISC = 2;
+
+    /**
+     * Whether or not to print debug message
+     */
+    var VERBOSE = false;
+
+    /**
+     * Phaser3 Default Configuration
+     */
     var config = {
         type: Phaser.AUTO,
         width: 9 * SCALE,
@@ -19,12 +39,23 @@
             create: create,
             update: update
         }
-    }; // config file for Phaser
+    };
 
+    /**
+     * Definitions of game instances
+     */
     var game = new Phaser.Game(config);
     var that;
-    var vol = 250;
 
+    /**
+     * Definitions of ball velocity
+     */
+    var verticalVelocity = 350;
+    var horizontalVelocity = 0;
+
+    /**
+     * Definitions of game objects
+     */
     var cursors,
         player,
         enemy,
@@ -33,81 +64,97 @@
         playerDeadField,
         gameText,
         hintText,
-        stepper,
-        gameState = 0;
-    
-    window.aifunc = null;
-    // definition of some global variables
+        stepper;
+
     /**
+     * Definitions of game state machine
+     * 
      * gameState:
      * 0: pausing
      * 1: playing
      * 2: I am winner
      * 3: I am loser
+     * 
      */
+    var gameState = 0;
+    
+    /**
+     * Definitions of ai function
+     */
+    window.enemyAI  = null;
+    window.playerAI = null;
+    
 
+    /**
+     * Definitions of hint texts
+     */
     const HINTTEXT = 'Esc to Pause, ` Key to resume the game\n          ← or → to Move.';
-    // Hint text
 
+
+    /**
+     * Load Assets
+     */
     function preload () {
         this.load.image('starfield', 'assets/starfield.png');
-        this.load.image('paddle', 'assets/paddle.png');
-        this.load.image('ball', 'assets/ball.png');
-        this.load.image('boundary', 'assets/deadline.png');
+        this.load.image('paddle'   , 'assets/paddle.png'   );
+        this.load.image('ball'     , 'assets/ball.png'     );
+        this.load.image('boundary' , 'assets/deadline.png' );
     }
 
+    /**
+     * Create Main Scene
+     */
     function create () {
-        this.add.tileSprite(0, 0, 9 * SCALE * ISC, 16 * SCALE * ISC, 'starfield');
-        // Background
 
+        // Load Background Image
+        this.add.tileSprite(0, 0, 9 * SCALE * ISC, 16 * SCALE * ISC, 'starfield');
+
+        // Saving Scene Object
         that   = this;
-        // Saving scene object
         
+        // Load Upper and Downer Boundary
         enemyDeadField = this.physics.add.sprite(0, 0, 'boundary');
         playerDeadField = this.physics.add.sprite(0, 16 * SCALE, 'boundary');
         enemyDeadField.body.immovable = true;
         playerDeadField.body.immovable = true;
-        // Adding Upper and Downer Boundary
 
+        // Load Player Boards
         player = this.physics.add.sprite(9 * SCALE / 2, 16 * SCALE - 20, 'paddle');
+        enemy  = this.physics.add.sprite(9 * SCALE / 2, 20, 'paddle');
         player.setBounce(0);
         player.setCollideWorldBounds(true);
         player.body.immovable = true;
-        // Player Board
-
-        enemy  = this.physics.add.sprite(9 * SCALE / 2, 20, 'paddle');
         enemy.setBounce(0);
         enemy.setCollideWorldBounds(true);
         enemy.body.immovable = true;
-        // Enemy Board
 
+        // Load Middle Acceleration Boundary
         stepper = this.physics.add.sprite(0, 16 * SCALE / 2, 'boundary');
-        // Acceleration Boundary
 
-        cursors = {
-            "left": this.input.keyboard.addKey(37),
-            "right": this.input.keyboard.addKey(39),
-            "esc": this.input.keyboard.addKey(27),
-            // "res": this.input.keyboard.addKey(96),
-        }
-        // Registration of Keyboard
+        // Binding Keyboard
+        // cursors = {
+        //     "left" : this.input.keyboard.addKey(37),
+        //     "right": this.input.keyboard.addKey(39),
+        //     "esc"  : this.input.keyboard.addKey(27),
+        // }
 
+        // Load Hint Texts
         gameText = this.add.text(9 * SCALE / 2 - 90, 16 * SCALE / 2 - 20, ' PAUSING  ', { fontSize: '32px', fill: '#FFF' });
         hintText = this.add.text(9 * SCALE / 2 - 110, 16 * SCALE / 2 + 30, HINTTEXT, { fontSize: '10px', fill: '#CCC' });
-        // Two Hint Texts
 
+        // Register Ball
         registerBall();
     }
 
     /**
-     * Used for registering new ball
+     * Init function of creating a ball
      * @param {none}
      */
     function registerBall() {
         ball = that.physics.add.sprite(9 * SCALE / 2, 16 * SCALE / 2, 'ball');
         ball.setBounce(1);
         ball.setCollideWorldBounds(true);
-        ball.setVelocityY(vol * -1);
+        ball.setVelocityY(verticalVelocity * -1);
         ball.setVelocityX(parseInt(150 - Math.random() * 300));
         that.physics.add.collider(ball, player, hitBall, null, that);
         that.physics.add.collider(ball, enemy , hitBall, null, that);
@@ -116,11 +163,15 @@
         that.physics.add.overlap(ball, stepper, addSpeed, null, that);
     }
 
+    /**
+     * Gaming Loop
+     */
     function update () {
 
-        let prev = true;
-        // if (cursors.res.isDown && gameState == 0) { gameState = 1; prev = false; }
         if (gameState != 1) {
+
+            // game is paused or ended
+
             this.physics.pause();
             switch (gameState) {
                 case 0:
@@ -135,36 +186,26 @@
                     break;
             }
             return;
+
         } else {
+
+            // game is on
+
             this.physics.resume();
             hintText.setText("");
             gameText.setText("");
-        }
-        // Judging from state to decide the game thread
 
-        if (cursors.esc.isDown && prev) {
-            gameState = 0;
-            return;
         }
-        // Decide whether to pause the game
 
-        callAI(enemy, sampleAI);
-        // Caller of default ai
-
-        if (window.aifunc !== null) {
-            callAI(player, window.aifunc);
-            return;
+        // Calling AIs to make decisions
+        if (window.enemyAI !== null) {
+            callAI(enemy, window.enemyAI);
         }
-        // Decide whether to start user ai
 
-        if (cursors.left.isDown) {
-            player.setVelocityX(-150);
-        } else if (cursors.right.isDown) {
-            player.setVelocityX(150);
-        } else {
-            player.setVelocityX(0);
+        // Calling Players AI to make decisions
+        if (window.playerAI !== null) {
+            callAI(player, window.playerAI);
         }
-        // Input from user keyboard
 
     }
 
@@ -173,28 +214,59 @@
      * @param {object} Phaser Object
      * @param {function} AI Function
      */
-    function callAI(ob, fn) {
+    function callAI(boardObject, fn) {
+
+        // Broadcasting informations to AI
         let aiPack = {
             "ball":   [ball.body.x, ball.body.y],
             "player": [player.body.x, player.body.y],
             "enemy":  [enemy.body.x, enemy.body.y],
             "board":  player.width,
-            "vol":    vol
+            "speed":  [horizontalVelocity, verticalVelocity]
         }
+
+        // Standardize the AI output
         let res = parseFloat(fn(aiPack));
         if (isNaN(res)) res = 0;
         if (Math.abs(res) > 1) res = parseInt(res / Math.abs(res));
-        ob.setVelocityX(res * 300);
+
+        // Move according to instructions of AI
+        boardObject.setVelocityX(res * 300);
+
     }
 
     /**
      * Default Built-in AI
      * @param {*} pack 
      */
-    function sampleAI(pack) {
-        if (pack.ball[0] < pack.enemy[0]) return -1;
-        else if (pack.ball[0] > pack.enemy[0] + pack.board) return 1;
-        else return 0;
+    window.enemyAI = function (pack) {
+
+        let xOfBall = pack.ball[0];
+        let lOfBoard = pack.enemy[0];
+        let rOfBoard = pack.enemy[0] + pack.board;
+        let midOfBoard = (lOfBoard + rOfBoard) / 2;
+
+        let distanceOfBall = Math.abs(pack.ball[1] - pack.enemy[1]);
+        let velocityOfBall = pack.speed[1];
+        let maximumMove = distanceOfBall / velocityOfBall * 300;
+        let minimumMove = Math.abs(pack.ball[0] - pack.enemy[0]);
+        
+        if (maximumMove > minimumMove) {
+
+            // Doing Aggressive Mode
+            if (xOfBall < (lOfBoard + 5)) return -1;
+            else if (xOfBall > (rOfBoard - 5)) return 1;
+            else if (xOfBall < midOfBoard) return 0.8;
+            else return -0.8;
+
+        } else {
+
+            // Doing Conservative Mode
+            if (xOfBall < midOfBoard) return -1;
+            else return 1;
+
+        } 
+
     }
 
     /**
@@ -202,9 +274,14 @@
      * @param {object} ball
      * @param {object} wall
      */
-    function hitWall (b, w) {
-        if (w == playerDeadField) gameState = 3;
-        else if (w == enemyDeadField) gameState = 2;
+    function hitWall (ball, wall) {
+        
+        // if ball hitting player's boundary, player lose
+        if (wall == playerDeadField) gameState = 3;
+
+        // if ball hitting enemy's boundary, enemy lose
+        else if (wall == enemyDeadField) gameState = 2;
+
     }
 
     /**
@@ -212,99 +289,46 @@
      * @param {object} ball
      * @param {object} wall
      */
-    function addSpeed(b, s) {
-        vol += 5;
+    function addSpeed(ball, wall) {
+
+        verticalVelocity += 20;
+
+        // Calculating the direction (-1 / 0 / 1) of ball
         let unit = 1;
         if (ball.body.velocity.y != 0) unit = parseInt(ball.body.velocity.y / Math.abs(ball.body.velocity.y));
-        ball.setVelocityY(vol * unit);
-        if (VERBOSE) console.log("Current Speed: " + (vol * unit));
+
+        // Updating Vertical Speed
+        ball.setVelocityY(verticalVelocity * unit);
+
+        // Print debugging message
+        if (VERBOSE) console.log("Current Speed: " + (verticalVelocity * unit));
+
     }
 
     /**
      * Actions when ball hits board
      * @param {object} ball
-     * @param {object} wall
+     * @param {object} board
      */
-    function hitBall (b, p) {
-        if (b.body.x < p.body.x + 20) ball.setVelocityX((b.body.x - p.body.x - 20) * 8);
-        else if (b.body.x > p.body.x + p.width - 20) ball.setVelocityX((b.body.x - p.body.x - p.width + 20) * 8);
+    function hitBall (ball, board) {
+
+        if (ball.body.x < board.body.x + 20) 
+            ball.setVelocityX((ball.body.x - board.body.x - 20) / 20 * verticalVelocity);
+        else if (ball.body.x > board.body.x + board.width - 20) 
+            ball.setVelocityX((ball.body.x - board.body.x - board.width + 20) / 20 * verticalVelocity);
+        
+        // Print debugging message
         if (VERBOSE) console.log("Hit");
+
     }
 
-
     /**
-     * Initialize ACE Editor
+     * Restart game
      */
-    const $editor = document.getElementById("editor");
-    const $blockly = document.getElementById("blockly");
-
-    var editor = ace.edit($editor, {
-        mode: "ace/mode/javascript",
-        selectionStyle: "text"
-    });
-    // window.editor = editor;
-    editor.setTheme("ace/theme/twilight");
-    editor.setValue(`
-    /**
-     * There are 5 objects in pack
-     * 
-     * ball, enemy, player are lists with 2 elements:
-     *  - pack.ball[0] means the x axis of the ball
-     *  - pack.ball[1] means the y axis of the ball
-     * board indicates the length of player's board:
-     *  - pack.board
-     * vol indicates the vertical velocity of the ball:
-     *  - pack.vol
-     * 
-     * The return value should between -1 and 1, deciding the horizontal velocity of player's board:
-     *  - return -1    means to scroll left with full spead
-     *  - return 0     means to stop
-     *  - return 0.5   means to scroll right with half spead
-     */
-    
-    function (pack) {
-        if (pack.ball[0] < pack.player[0]) return -1;
-        else if (pack.ball[0] > pack.player[0] + pack.board) return 1;
-        else return 0;
-    }
-    `);
-    editor.moveCursorTo(0, 0);
-
-    /**
-     * Initialize Submit Button
-     */
-    var workspace;
-    const $submit = document.getElementById("submit");
-    $submit.onclick = function () {
-        if (!blocklyMode) {
-            eval("window.aifunc = " + editor.getValue());
-        } else {
-            let code = 'function (pack) {' + Blockly.JavaScript.workspaceToCode(workspace) + '}';
-            eval("window.aifunc = " + code);
-            console.log(code);
-        }
+    window.restartGame = function () {
         ball.destroy();
         registerBall();
         gameState = 1;
     }
 
-    var blocklyMode = true;
-    const $switch = document.getElementById("switch");
-    $switch.onclick = function () {
-        blocklyMode = !blocklyMode;
-        if (blocklyMode) {
-            $blockly.classList.add("show");
-            $editor.classList.remove("show");
-        } else {
-            $blockly.classList.remove("show");
-            $editor.classList.add("show");
-        }
-    }
-    workspace = Blockly.inject('blockly',
-        {
-            media: 'https://blockly-demo.appspot.com/static/media/',
-            toolbox: document.getElementById('toolbox')
-        });
-    window.workspace = workspace;
-    Blockly.Xml.domToWorkspace(document.getElementById('demo'), workspace);
 })();
