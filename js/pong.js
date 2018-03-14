@@ -313,10 +313,12 @@
     function hitBall (ball, board) {
 
         if (ball.body.x < board.body.x + 20) 
-            ball.setVelocityX((ball.body.x - board.body.x - 20) / 20 * verticalVelocity);
+            ball.setVelocityX(horizontalVelocity = (ball.body.x - board.body.x - 20) / 20 * verticalVelocity);
         else if (ball.body.x > board.body.x + board.width - 20) 
-            ball.setVelocityX((ball.body.x - board.body.x - board.width + 20) / 20 * verticalVelocity);
+            ball.setVelocityX(horizontalVelocity = (ball.body.x - board.body.x - board.width + 20) / 20 * verticalVelocity);
         
+        horizontalVelocity = Math.abs(horizontalVelocity);
+
         // Print debugging message
         if (VERBOSE) console.log("Hit");
 
@@ -328,6 +330,8 @@
     window.restartGame = function () {
         ball.destroy();
         registerBall();
+        horizontalVelocity = 350;
+        horizontalVelocity = 0;
         gameState = 1;
     }
 
