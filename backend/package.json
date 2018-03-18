@@ -1,0 +1,27 @@
+{
+  "name": "pong-backend",
+  "version": "1.0.0",
+  "description": "The Backend For Pong",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BiggerLab-AI/Pong.git"
+  },
+  "keywords": [
+    "pong"
+  ],
+  "author": "NHibiki",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/BiggerLab-AI/Pong/issues"
+  },
+  "homepage": "https://github.com/BiggerLab-AI/Pong#readme",
+  "dependencies": {
+    "koa": "^2.5.0",
+    "koa-static": "^4.0.2",
+    "socket.io": "^2.0.4"
+  }
+}

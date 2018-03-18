@@ -6,18 +6,28 @@
     const $blockly = document.getElementById("blockly");
 
     /**
+     * Save/Get Code Locally
+     */
+    window.saveCodeLocally = function(code) {
+        localStorage.setItem("PingGameCode", code);
+    }
+    window.getCodeLocally  = function() {
+        return localStorage.getItem("PingGameCode") || "";
+    }
+
+    /**
      * Initialize Submit Button
      */
     var workspace;
     const $submit = document.getElementById("submit");
     $submit.onclick = function () {
         if (!blocklyMode) {
-            eval("window.playerAI = " + editor.getValue());
+            window.playerCode = editor.getValue();
         } else {
-            let code = 'function (pack) {' + Blockly.JavaScript.workspaceToCode(workspace) + '}';
-            eval("window.playerAI = " + code);
-            // console.log(code);
+            window.playerCode = 'function (pack) {' + Blockly.JavaScript.workspaceToCode(workspace) + '}';
         }
+        window.saveCodeLocally(window.playerCode);
+        eval("window.playerAI = " + window.playerCode);
         window.restartGame();
     }
 
@@ -41,13 +51,13 @@
     window.workspace = workspace;
     Blockly.Xml.domToWorkspace(document.getElementById('demo'), workspace);
 
-    var editor = ace.edit($editor, {
+    let editor = ace.edit($editor, {
         mode: "ace/mode/javascript",
         selectionStyle: "text"
     });
-    // window.editor = editor;
+    window.editor = editor;
     editor.setTheme("ace/theme/twilight");
-    editor.setValue(`
+    editor.setValue(window.getCodeLocally() || `
     /**
      * There are 5 objects in pack
      * 

@@ -1,0 +1,9 @@
+# Avoid Mac File
+.DS_Store
+
+# Avoid Editor File
+.code
+.vscode
+
+# Avoid Nodejs Dependencies
+node_modules

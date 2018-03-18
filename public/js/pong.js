@@ -77,7 +77,16 @@
      */
     window.enemyAI  = null;
     window.playerAI = null;
-    
+    window.enemyCode = "";
+    window.playerCode = "";
+
+    window.enemyName = "Computer";
+    window.playerName = "You";
+
+    window.playerList = {};
+    window.logList = {};
+
+    window.Math._oldRandom = window.Math.random;
 
     /**
      * Definitions of hint texts
@@ -138,6 +147,7 @@
 
         // Register Ball
         registerBall();
+        resetRandomSeed(seed=5);
     }
 
     /**
@@ -352,11 +362,27 @@
     }
 
     /**
+     * The Seed Reset Function
+     * @param {int} seed 
+     */
+    function resetRandomSeed(seed) {
+        window.Math.seed = parseInt(seed);
+        window.Math.random = function(min, max) {
+            min = min || 0; 
+            max = max || 1;
+            window.Math.seed = (window.Math.seed * 9301 + 49297) % 233280;
+            var rnd = window.Math.seed / 233280.0;
+            return min + rnd * (max - min);
+        };
+    }
+
+    /**
      * Restart game
      */
-    window.restartGame = function () {
+    window.restartGame = function (seed=5) {
         ball.destroy();
         registerBall();
+        resetRandomSeed(seed);
         gameState = 1;
     }
 
