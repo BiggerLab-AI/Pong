@@ -48,12 +48,6 @@
     var that;
 
     /**
-     * Definitions of ball velocity
-     */
-    var verticalVelocity = 350;
-    var horizontalVelocity = 0;
-
-    /**
      * Definitions of game objects
      */
     var cursors,
@@ -151,16 +145,23 @@
      * @param {none}
      */
     function registerBall() {
+        // Initialize Ball Graphic
         ball = that.physics.add.sprite(9 * SCALE / 2, 16 * SCALE / 2, 'ball');
         ball.setBounce(1);
         ball.setCollideWorldBounds(true);
-        ball.setVelocityY(verticalVelocity * -1);
+        ball.body.stopVelocityOnCollide = false;
+
+        // Initialize Velocity
+        ball.setVelocityY(350);
         ball.setVelocityX(parseInt(150 - Math.random() * 300));
+
+        // Initialize Boundary Hit
         that.physics.add.collider(ball, player, hitBall, null, that);
         that.physics.add.collider(ball, enemy , hitBall, null, that);
         that.physics.add.collider(ball, enemyDeadField, hitWall, null, that);
         that.physics.add.collider(ball, playerDeadField, hitWall, null, that);
         that.physics.add.overlap(ball, stepper, addSpeed, null, that);
+
     }
 
     /**
@@ -222,7 +223,7 @@
             "player": [player.body.x, player.body.y],
             "enemy":  [enemy.body.x, enemy.body.y],
             "board":  player.width,
-            "speed":  [horizontalVelocity, verticalVelocity]
+            "speed":  [ball.body.velocity.x, ball.body.velocity.y]
         }
 
         // Standardize the AI output
@@ -241,28 +242,54 @@
      */
     window.enemyAI = function (pack) {
 
+        let me = pack.enemy;
         let xOfBall = pack.ball[0];
-        let lOfBoard = pack.enemy[0];
-        let rOfBoard = pack.enemy[0] + pack.board;
+        let lOfBoard = me[0];
+        let rOfBoard = me[0] + pack.board;
         let midOfBoard = (lOfBoard + rOfBoard) / 2;
 
-        let distanceOfBall = Math.abs(pack.ball[1] - pack.enemy[1]);
-        let velocityOfBall = pack.speed[1];
-        let maximumMove = distanceOfBall / velocityOfBall * 300;
-        let minimumMove = Math.abs(pack.ball[0] - pack.enemy[0]);
-        
-        if (maximumMove > minimumMove) {
+        let yDistanceOfBall = Math.abs(pack.ball[1] - me[1]);
+        let xVelocityOfBall = pack.speed[0];
+        let yVelocityOfBall = pack.speed[1];
+
+        let playgroundWidth = 350;
+        let deltaXDistanceOfBall = 0;
+        let totalXDistanceOfBall = Math.ceil(Math.abs(yDistanceOfBall / yVelocityOfBall * xVelocityOfBall));
+
+        if (xVelocityOfBall > 0) deltaXDistanceOfBall = totalXDistanceOfBall - (playgroundWidth - xOfBall);
+        else deltaXDistanceOfBall = totalXDistanceOfBall - xOfBall;
+
+        let targetX = xOfBall;
+        if (deltaXDistanceOfBall > 0) {
+            // the ball will hit the side
+            let reverse = (Math.floor(deltaXDistanceOfBall / playgroundWidth)) % 2 == 0 ? 1 : -1;
+            deltaXDistanceOfBall %= playgroundWidth;
+
+            if (reverse * xVelocityOfBall > 0) {
+                // in the last round the ball shoot from the right
+                targetX = playgroundWidth - deltaXDistanceOfBall;
+            } else {
+                // in the last round the ball shoot from the left
+                targetX = deltaXDistanceOfBall;
+            }
+        } else {
+            // the ball will not hit the side
+            if (xVelocityOfBall > 0) targetX = xOfBall + totalXDistanceOfBall;
+            else targetX = xOfBall - totalXDistanceOfBall;
+        }
+
+        // console.log(targetX);
+
+        if (lOfBoard + 5 < targetX && targetX < rOfBoard - 5) {
 
             // Doing Aggressive Mode
-            if (xOfBall < (lOfBoard + 5)) return -1;
-            else if (xOfBall > (rOfBoard - 5)) return 1;
-            else if (xOfBall < midOfBoard) return 0.8;
-            else return -0.8;
+            if (targetX < midOfBoard) return 0.3;
+            else return -0.3;
 
         } else {
 
             // Doing Conservative Mode
-            if (xOfBall < midOfBoard) return -1;
+            if (targetX < midOfBoard) return -1;
             else return 1;
 
         } 
@@ -291,14 +318,14 @@
      */
     function addSpeed(ball, wall) {
 
-        verticalVelocity += 20;
+        let verticalVelocity = ball.body.velocity.y;
 
         // Calculating the direction (-1 / 0 / 1) of ball
         let unit = 1;
         if (ball.body.velocity.y != 0) unit = parseInt(ball.body.velocity.y / Math.abs(ball.body.velocity.y));
 
         // Updating Vertical Speed
-        ball.setVelocityY(verticalVelocity * unit);
+        ball.setVelocityY(verticalVelocity + 20 * unit);
 
         // Print debugging message
         if (VERBOSE) console.log("Current Speed: " + (verticalVelocity * unit));
@@ -312,13 +339,13 @@
      */
     function hitBall (ball, board) {
 
+        let horizontalVelocity = 0;
         if (ball.body.x < board.body.x + 20) 
-            ball.setVelocityX(horizontalVelocity = (ball.body.x - board.body.x - 20) / 20 * verticalVelocity);
+            horizontalVelocity = (ball.body.x - board.body.x - 20) / 20 * ball.body.velocity.y;
         else if (ball.body.x > board.body.x + board.width - 20) 
-            ball.setVelocityX(horizontalVelocity = (ball.body.x - board.body.x - board.width + 20) / 20 * verticalVelocity);
+            horizontalVelocity = (ball.body.x - board.body.x - board.width + 20) / 20 * ball.body.velocity.y;
+        ball.setVelocityX(horizontalVelocity);
         
-        horizontalVelocity = Math.abs(horizontalVelocity);
-
         // Print debugging message
         if (VERBOSE) console.log("Hit");
 
@@ -330,8 +357,6 @@
     window.restartGame = function () {
         ball.destroy();
         registerBall();
-        horizontalVelocity = 350;
-        horizontalVelocity = 0;
         gameState = 1;
     }
 
