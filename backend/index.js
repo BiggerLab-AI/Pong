@@ -19,7 +19,7 @@ var logs = [];
 app.use(require('koa-static')("../public"));
 
 var getCredential = (socketID) => {
-    return "Dev User";
+    return socketID.substr(0, 6);
 }
 
 // Socketio Functions
@@ -27,9 +27,10 @@ io.on('connection', socket => {
 
     if (VERBOSE) console.log("[System] " + socket.id + ": Login.");
 
-    socket.on('login', token => {
+    socket.on('login', () => {
 
         let user = getCredential(socket.id);
+        if (!bots[user]) bots[user] = {};
         if (user) 
             socket.emit("updateLogin", user);
         else
@@ -39,8 +40,9 @@ io.on('connection', socket => {
     
     socket.on("getPlayerList", () => {
 
+        if (VERBOSE) console.log("[System] Get playerList for " + getCredential(socket.id) + `.`);
         if (getCredential(socket.id)) {
-            socket.emit("updatePlayerList", Object.keys(bots));
+            socket.emit("updatePlayerList", bots);
         }
 
     });
@@ -49,10 +51,14 @@ io.on('connection', socket => {
 
 
         if (getCredential(socket.id)) {
+
+            if (VERBOSE) console.log("[System] Get code for " + codeInfo.playerName + `:` + codeInfo.name + `.`);
             socket.emit("updatePlayerCode", {
-                playerName: codeInfo.playerID,
-                name: codeInfo.name,
-                code: bots[codeInfo.playerID][codeInfo.name]
+                playerName: codeInfo.playerName,
+                name: codeInfo.name || codeInfo.playerName,
+                code: codeInfo.name ? 
+                        bots[codeInfo.playerName][codeInfo.name] : 
+                        bots[codeInfo.playerName][Object.keys(bots[codeInfo.playerName])[0]]
             });
         }
 
@@ -63,7 +69,9 @@ io.on('connection', socket => {
         let user = getCredential(socket.id);
         if (user) {
 
-            bots[user][codeInfo.name] = codeInfo.code;
+            if (VERBOSE) console.log("[System] Saved code for " + getCredential(socket.id) + `:` + codeFile.name + `.`);
+            if (!bots[user]) bots[user] = {};
+            bots[user][codeFile.name] = codeFile.code;
             socket.emit("savedCode", true);
 
         }
@@ -75,6 +83,7 @@ io.on('connection', socket => {
         let user = getCredential(socket.id);
         if (user) {
 
+            if (VERBOSE) console.log("[System] Get Own Logs for " + user + `.`);
             socket.emit("updateLatestLogs", logsOnUser[user]);
 
         }
@@ -84,6 +93,7 @@ io.on('connection', socket => {
     socket.on("getLogs", options => {
         
         if (getCredential(socket.id)) {
+            if (VERBOSE) console.log("[System] Get Logs for " + getCredential(socket.id) + `.`);
             socket.emit("updateLogs", logs.slice(options.offset || 0, options.size || 10));
         }
 
@@ -91,6 +101,9 @@ io.on('connection', socket => {
 
     socket.on('disconnect', () => {
 
+        let user = getCredential(socket.id);
+        if (!bots[user]) return;
+        if (Object.keys(bots[user]).length == 0) delete bots[user];
         if (VERBOSE) console.log("[System] " + socket.id + `: Disconnect.`);
 
     });

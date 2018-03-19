@@ -22,8 +22,7 @@
     var logined = false;
     const $userName = document.getElementById("username");
     const $codeName = document.getElementById("codename");
-    const $myList = document.getElementById("myList");
-    const $playerList = document.getElementById("playerList");
+    const $save = document.getElementById("save");
 
     socket.on("updateLogin", userName => {
 
@@ -33,6 +32,7 @@
         } else {
             logined = true;
             window.playerName = userName;
+            socket.emit("getPlayerList");
         }
 
         // Update View
@@ -42,8 +42,8 @@
     socket.on("updatePlayerList", playerList => {
 
         window.playerList = playerList;
-
-        // Update View
+        buildList("myList", playerList[window.playerName] || {});
+        buildList("playerList", playerList);
 
     });
 
@@ -53,7 +53,8 @@
         else {
             window.enemyName = codeFile.playerName;
             window.enemyCode = codeFile.code;
-            window.enemyAI = eval(codeFile.code);
+            eval(`window.enemyAI = ${codeFile.code}`);
+            window.submitCode();
             window.restartGame();
         }
 
@@ -63,7 +64,8 @@
 
     socket.on("savedCode", version => {
 
-        // Update View
+        if (version) alert("Saved!");
+        else alert("Failed!");
 
     });
 
@@ -95,6 +97,44 @@
         $codeName.innerHTML = `${codeFile.name} - ${codeFile.version}`;
         window.playerCode = codeFile.code;
         window.editor.setValue(codeFile.code);
+    }
+
+    $save.onclick = function() {
+        socket.emit("saveMyCode", {
+            name: $codeName.value,
+            code: editor.getValue(),
+        });
+    }
+
+    window.onload = function() {
+        socket.emit("login");
+    }
+
+    function buildList (id, list) {
+        $e = document.getElementById(id);
+        $e.innerHTML = "";
+
+        let aim = "get";
+        if (window.playerName in list) { aim = "compete"; }
+        list = Object.keys(list);
+
+        let html = "";
+        for (let i = 0; i < list.length; i++) {
+            if (aim == "compete" && list[i] == window.playerName) continue;
+            html += `<button id="${aim}-${list[i]}" class="submit">${list[i]}</button>`;
+        }
+
+        $e.innerHTML = html;
+
+        for (let i = 0; i < list.length; i++) {
+            if (aim == "compete" && list[i] == window.playerName) continue;
+            document.getElementById(`${aim}-${list[i]}`).onclick = function () {
+                socket.emit("getPlayerCode", {
+                    playerName: (aim == "get") ? window.playerName : list[i],
+                    name: (aim == "get") ? list[i]: ""
+                });
+            }
+        }
     }
 
 }());
