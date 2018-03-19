@@ -89,10 +89,20 @@ Blockly.Blocks['ball_y'] = {
     }
 };
 
-Blockly.Blocks['ball_speed'] = {
+Blockly.Blocks['ball_speed_x'] = {
     init: function() {
         this.appendDummyInput()
-            .appendField(new Blockly.FieldLabel('Ball Speed'));
+            .appendField(new Blockly.FieldLabel('Ball Speed X'));
+        this.setOutput(true, 'Number');
+        this.setColour(60);
+        this.setTooltip('Returns Ball Speed.');
+    }
+};
+
+Blockly.Blocks['ball_speed_y'] = {
+    init: function() {
+        this.appendDummyInput()
+            .appendField(new Blockly.FieldLabel('Ball Speed Y'));
         this.setOutput(true, 'Number');
         this.setColour(60);
         this.setTooltip('Returns Ball Speed.');
@@ -149,10 +159,14 @@ Blockly.JavaScript['ball_y'] = function(block) {
     return ['pack.ball[1]', Blockly.JavaScript.ORDER_MEMBER];
 };
 
-Blockly.JavaScript['ball_speed'] = function(block) {
+Blockly.JavaScript['ball_speed_x'] = function(block) {
+    return ['pack.speed[0]', Blockly.JavaScript.ORDER_MEMBER];
+};
+
+Blockly.JavaScript['ball_speed_y'] = function(block) {
     return ['pack.speed[1]', Blockly.JavaScript.ORDER_MEMBER];
 };
 
 Blockly.JavaScript['board_length'] = function(block) {
-    return ['pack.board', Blockly.JavaScript.ORDER_MEMBER];
+    return ['pack.board[0]', Blockly.JavaScript.ORDER_MEMBER];
 };

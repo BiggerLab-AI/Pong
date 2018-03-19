@@ -47,6 +47,9 @@
     var game = new Phaser.Game(config);
     var that;
 
+    // Using Keyboard
+    var botMade = true;
+
     /**
      * Definitions of game objects
      */
@@ -100,6 +103,7 @@
     function preload () {
         this.load.image('starfield', 'assets/starfield.png');
         this.load.image('paddle'   , 'assets/paddle.png'   );
+        this.load.image('paddle-2' , 'assets/paddle-2.png' );
         this.load.image('ball'     , 'assets/ball.png'     );
         this.load.image('boundary' , 'assets/deadline.png' );
     }
@@ -122,7 +126,11 @@
         playerDeadField.body.immovable = true;
 
         // Load Player Boards
-        player = this.physics.add.sprite(9 * SCALE / 2, 16 * SCALE - 20, 'paddle');
+        if (botMade) {
+            player = this.physics.add.sprite(9 * SCALE / 2, 16 * SCALE - 20, 'paddle');
+        } else {
+            player = this.physics.add.sprite(9 * SCALE / 2, 16 * SCALE - 20, 'paddle-2');
+        }
         enemy  = this.physics.add.sprite(9 * SCALE / 2, 20, 'paddle');
         player.setBounce(0);
         player.setCollideWorldBounds(true);
@@ -135,11 +143,13 @@
         stepper = this.physics.add.sprite(0, 16 * SCALE / 2, 'boundary');
 
         // Binding Keyboard
-        // cursors = {
-        //     "left" : this.input.keyboard.addKey(37),
-        //     "right": this.input.keyboard.addKey(39),
-        //     "esc"  : this.input.keyboard.addKey(27),
-        // }
+        if (botMade) {
+            cursors = {
+                "left" : this.input.keyboard.addKey(37),
+                "right": this.input.keyboard.addKey(39),
+                "esc"  : this.input.keyboard.addKey(27),
+            }
+        }
 
         // Load Hint Texts
         gameText = this.add.text(9 * SCALE / 2 - 90, 16 * SCALE / 2 - 20, ' PAUSING  ', { fontSize: '32px', fill: '#FFF' });
@@ -213,9 +223,19 @@
             callAI(enemy, window.enemyAI);
         }
 
-        // Calling Players AI to make decisions
-        if (window.playerAI !== null) {
-            callAI(player, window.playerAI);
+        if (botMade) {
+            // Calling Players AI to make decisions
+            if (window.playerAI !== null) {
+                callAI(player, window.playerAI);
+            }
+        } else {
+            if (cursors.left.isDown) {
+                player.setVelocityX(-400);
+            } else if (cursors.right.isDown) {
+                player.setVelocityX(400);
+            } else {
+                player.setVelocityX(0);
+            }
         }
 
     }
@@ -228,11 +248,16 @@
     function callAI(boardObject, fn) {
 
         // Broadcasting informations to AI
+        let player1 = null,
+            player2 = null;
+        if (boardObject == player) { player1 = player; player2 = enemy; }
+        else { player2 = player; player1 = enemy; }
+
         let aiPack = {
-            "ball":   [ball.body.x, ball.body.y],
-            "player": [player.body.x, player.body.y],
-            "enemy":  [enemy.body.x, enemy.body.y],
-            "board":  player.width,
+            "ball":   [ball.body.x   , ball.body.y   ],
+            "player": [player1.body.x, player1.body.y],
+            "enemy":  [player2.body.x, player2.body.y],
+            "board":  [player1.width , player2.width ],
             "speed":  [ball.body.velocity.x, ball.body.velocity.y]
         }
 
@@ -250,12 +275,24 @@
      * Default Built-in AI
      * @param {*} pack 
      */
-    window.enemyAI = function (pack) {
+    window.enemyAI = window._aiSimple = function (pack) {
 
-        let me = pack.enemy;
+        if (pack.ball[0] < pack.player[0]) return -1;
+        else if (pack.ball[0] > pack.player[0] + pack.board[0]) return 1;
+        else return 0;
+
+    }
+
+    window._aiStupid = function(pack) {
+        return (0.5 - Math.random()) * 2;
+    }
+
+    window._aiJerry = function (pack) {
+
+        let me = pack.player;
         let xOfBall = pack.ball[0];
         let lOfBoard = me[0];
-        let rOfBoard = me[0] + pack.board;
+        let rOfBoard = me[0] + pack.board[1];
         let midOfBoard = (lOfBoard + rOfBoard) / 2;
 
         let yDistanceOfBall = Math.abs(pack.ball[1] - me[1]);
@@ -293,8 +330,9 @@
         if (lOfBoard + 5 < targetX && targetX < rOfBoard - 5) {
 
             // Doing Aggressive Mode
-            if (targetX < midOfBoard) return 0.3;
-            else return -0.3;
+            if (targetX < lOfBoard + 20) return 0.05;
+            else if (lOfBoard - 20 < targetX) return -0.05;
+            else return 0;
 
         } else {
 

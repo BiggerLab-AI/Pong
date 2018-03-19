@@ -323,7 +323,8 @@
             <block type="enemy_y"></block>
             <block type="ball_x"></block>
             <block type="ball_y"></block>
-            <block type="ball_speed"></block>
+            <block type="ball_speed_x"></block>
+            <block type="ball_speed_y"></block>
             <block type="board_length"></block>
         </category>
         <category name="Pong Logic">
@@ -427,7 +428,20 @@
     </xml>
 
     <button class="submit" style="right: 130px" id="switch">Switch</button>
-    <button class="submit" id="submit">Submit</button>
+    <button class="submit" id="save">Save</button>
+    <div id="panel">
+        <div class="scroller">
+            <span>Current Bot</span>
+            <input value="MyBot" placeholder="Project Name"/>
+            <span>Your Bot</span>
+            <span>Built-in Bot</span>
+            <button id="submit_stupid" class="submit">Stupid AI</button>
+            <button id="submit_simple" class="submit">Simple AI</button>
+            <button id="submit_jerry"  class="submit">Agent Jerry</button>
+            <span>Online Bot</span>
+        </div>
+    </div>
+
     <script src="./js/blockly_compressed.js"></script>
     <script src="./js/blocks_compressed.js"></script>
     <script src="./js/javascript_compressed.js"></script>
