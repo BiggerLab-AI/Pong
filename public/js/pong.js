@@ -164,7 +164,7 @@
      * Init function of creating a ball
      * @param {none}
      */
-    function registerBall() {
+    function registerBall(isNagative=0) {
         // Initialize Ball Graphic
         ball = that.physics.add.sprite(9 * SCALE / 2, 16 * SCALE / 2, 'ball');
         ball.setBounce(1);
@@ -172,7 +172,8 @@
         ball.body.stopVelocityOnCollide = false;
 
         // Initialize Velocity
-        ball.setVelocityY(350);
+        if (isNagative) ball.setVelocityY(-350);
+        else ball.setVelocityY(350);
         ball.setVelocityX(parseInt(150 - Math.random() * 300));
 
         // Initialize Boundary Hit
@@ -419,7 +420,7 @@
      */
     window.restartGame = function (seed=5) {
         ball.destroy();
-        registerBall();
+        registerBall(seed % 2);
         resetRandomSeed(seed);
         gameState = 1;
     }

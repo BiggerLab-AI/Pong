@@ -11,55 +11,87 @@ const VERBOSE = true;
 /**
  * PlayerList initialize
  */
-var playerList = {};
+var bots = {};
+var logsOnUser = {};
+var logs = [];
 
 // Load Static File
 app.use(require('koa-static')("../public"));
 
-var getCredential = (token) => {
-    return token;
+var getCredential = (socketID) => {
+    return "Dev User";
 }
 
 // Socketio Functions
 io.on('connection', socket => {
 
     if (VERBOSE) console.log("[System] " + socket.id + ": Login.");
-    playerList[socket.id] = "";
 
     socket.on('login', token => {
 
-        playerList[socket.id] = getCredential(token);
-        socket.emit("updateLogin", playerList[socket.id]);
+        let user = getCredential(socket.id);
+        if (user) 
+            socket.emit("updateLogin", user);
+        else
+            socket.emit("updateLogin", false);
 
     });
     
     socket.on("getPlayerList", () => {
 
+        if (getCredential(socket.id)) {
+            socket.emit("updatePlayerList", Object.keys(bots));
+        }
+
     });
 
     socket.on("getPlayerCode", codeInfo => {
-        // codeInfo.name
-        // codeInfo.playerID
+
+
+        if (getCredential(socket.id)) {
+            socket.emit("updatePlayerCode", {
+                playerName: codeInfo.playerID,
+                name: codeInfo.name,
+                code: bots[codeInfo.playerID][codeInfo.name]
+            });
+        }
+
     });
 
     socket.on("saveMyCode", codeFile => {
-        // codeFile.name
-        // codeFile.code
+
+        let user = getCredential(socket.id);
+        if (user) {
+
+            bots[user][codeInfo.name] = codeInfo.code;
+            socket.emit("savedCode", true);
+
+        }
+
     });
 
     socket.on("getLatestLogs", () => {
 
+        let user = getCredential(socket.id);
+        if (user) {
+
+            socket.emit("updateLatestLogs", logsOnUser[user]);
+
+        }
+
     });
 
     socket.on("getLogs", options => {
-        // options.offset
-        // options.limit
-    })
+        
+        if (getCredential(socket.id)) {
+            socket.emit("updateLogs", logs.slice(options.offset || 0, options.size || 10));
+        }
+
+    });
 
     socket.on('disconnect', () => {
 
         if (VERBOSE) console.log("[System] " + socket.id + `: Disconnect.`);
-        delete playerList[socket.id];
 
     });
 

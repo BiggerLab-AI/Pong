@@ -22,7 +22,8 @@
     var logined = false;
     const $userName = document.getElementById("username");
     const $codeName = document.getElementById("codename");
-    const $panelBoard = document.getElementById("panelBoard");
+    const $myList = document.getElementById("myList");
+    const $playerList = document.getElementById("playerList");
 
     socket.on("updateLogin", userName => {
 
@@ -48,7 +49,7 @@
 
     socket.on("updatePlayerCode", codeFile => {
 
-        if (codeFile.id == socket.id) { setupWorkSpace(codeFile); }
+        if (codeFile.playerName == window.playerName) { setupWorkSpace(codeFile); }
         else {
             window.enemyName = codeFile.playerName;
             window.enemyCode = codeFile.code;
