@@ -3,8 +3,10 @@ const koa    = require('koa'),
       server = require('http').Server(app.callback()),
       io     = require('socket.io')(server),
       path   = require('path'),
-      db     = require('./db.js');
+      db     = require('./db.js'),
+      fs     = require('fs');
 
+if (!fs.existsSync("./code")) fs.mkdirSync("./code");
 
 // Get Server Port
 const port = process.argv[2] || process.env.PONG_PORT;
