@@ -42,8 +42,13 @@ body {
 .submit:hover {
     opacity: .6;
 }
+.submit:disabled, #panel .submit:disabled {
+    cursor: default;
+    background: #999;
+    opacity: .8;
+}
 
-#save:hover +#panel{
+#panelBtn:hover +#panel{
     width: 206px;
     height: 400px;
     padding: 10px 10px;

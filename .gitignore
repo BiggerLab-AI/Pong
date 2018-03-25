@@ -7,3 +7,5 @@
 
 # Avoid Nodejs Dependencies
 node_modules
+code
+!.placeholder

@@ -330,6 +330,8 @@
         <category name="Pong Logic">
             <block type="ball_ontheleft"></block>
             <block type="ball_ontheright"></block>
+            <block type="get_estimate_hit_time"></block>
+            <block type="get_predict_ball_target_x"></block>
         </category>
         <category name="Return">
             <block type="return"></block>
@@ -428,11 +430,19 @@
     </xml>
 
     <button class="submit" style="right: 130px" id="switch">Switch</button>
-    <button class="submit" id="save">Save</button>
+    <button class="submit" id="panelBtn">Panel</button>
     <div id="panel">
         <div class="scroller">
+            <span>User</span>
+            <loader id="userpanel">
+                <input id="loginname" value="" placeholder="Your BiggerLab Name"/>
+                <input id="loginpass" value="" type= "password" placeholder="Your BiggerLab Password"/>
+                <button id="loginsubmit" class="submit">Login</button>
+                <button class="submit" onclick="window.open('http://minecraft.biggerlab.com/signup', 'signup');">Register</button>
+            </loader>
             <span>Current Bot</span>
             <input id="codename" value="MyBot" placeholder="Project Name"/>
+            <button class="submit" id="save">Save</button>
             <span>Your Bot</span>
             <list id="myList"></list>
             <span>Built-in Bot</span>

@@ -23,19 +23,27 @@
     const $userName = document.getElementById("username");
     const $codeName = document.getElementById("codename");
     const $save = document.getElementById("save");
+    const $loginname = document.getElementById("loginname");
+    const $loginpass = document.getElementById("loginpass");
+    const $loginsubmit = document.getElementById("loginsubmit");
+    const $userpanel = document.getElementById("userpanel");
 
-    socket.on("updateLogin", userName => {
+    socket.on("updateLogin", userInfo => {
 
-        if (!userName) {
+        if (!userInfo) {
             logined = false;
+            $loginsubmit.disabled = false;
+            $loginsubmit.innerHTML = "Login";
             window.playerName = "You";
         } else {
             logined = true;
-            window.playerName = userName;
+            window.playerName = userInfo.name;
+            window.currentUser = userInfo;
+
+            $userpanel.innerHTML = `<p>Welcome: ${window.playerName}</p>`;
+
             socket.emit("getPlayerList");
         }
-
-        // Update View
 
     });
 
@@ -66,6 +74,8 @@
 
         if (version) alert("Saved!");
         else alert("Failed!");
+
+        socket.emit("getPlayerList");
 
     });
 
@@ -106,8 +116,13 @@
         });
     }
 
-    window.onload = function() {
-        socket.emit("login");
+    $loginsubmit.onclick = function() {
+        $loginsubmit.disabled = true;
+        $loginsubmit.innerHTML = "LoginING";
+        socket.emit("login", {
+            user: $loginname.value,
+            passwd: $loginpass.value
+        });
     }
 
     function buildList (id, list) {

@@ -425,4 +425,49 @@
         gameState = 1;
     }
 
+    /**
+     * Buitin Functions
+     */
+    window.getEstimateHitTime = function(pack) {
+        let yDistanceOfBall = Math.abs(pack.ball[1] - pack.player[1]);
+        let yVelocityOfBall = pack.speed[1];
+        return Math.ceil(Math.abs(yDistanceOfBall / yVelocityOfBall));
+    }
+    
+    window.getPreditBallTargetX = function(pack) {
+        let me = pack.player;
+        let xOfBall = pack.ball[0];
+
+        let yDistanceOfBall = Math.abs(pack.ball[1] - me[1]);
+        let xVelocityOfBall = pack.speed[0];
+        let yVelocityOfBall = pack.speed[1];
+
+        let playgroundWidth = 350;
+        let deltaXDistanceOfBall = 0;
+        let totalXDistanceOfBall = Math.ceil(Math.abs(yDistanceOfBall / yVelocityOfBall * xVelocityOfBall));
+
+        if (xVelocityOfBall > 0) deltaXDistanceOfBall = totalXDistanceOfBall - (playgroundWidth - xOfBall);
+        else deltaXDistanceOfBall = totalXDistanceOfBall - xOfBall;
+
+        let targetX = xOfBall;
+        if (deltaXDistanceOfBall > 0) {
+            // the ball will hit the side
+            let reverse = (Math.floor(deltaXDistanceOfBall / playgroundWidth)) % 2 == 0 ? 1 : -1;
+            deltaXDistanceOfBall %= playgroundWidth;
+
+            if (reverse * xVelocityOfBall > 0) {
+                // in the last round the ball shoot from the right
+                targetX = playgroundWidth - deltaXDistanceOfBall;
+            } else {
+                // in the last round the ball shoot from the left
+                targetX = deltaXDistanceOfBall;
+            }
+        } else {
+            // the ball will not hit the side
+            if (xVelocityOfBall > 0) targetX = xOfBall + totalXDistanceOfBall;
+            else targetX = xOfBall - totalXDistanceOfBall;
+        }
+        return targetX;
+    }
+
 })();

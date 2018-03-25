@@ -2,47 +2,81 @@ const koa    = require('koa'),
       app    = new koa(),
       server = require('http').Server(app.callback()),
       io     = require('socket.io')(server),
-      path   = require('path');
+      path   = require('path'),
+      db     = require('./db.js');
+
 
 // Get Server Port
-const port = process.env.PONG_PORT;
+const port = process.argv[2] || process.env.PONG_PORT;
 const VERBOSE = true;
- 
+
 /**
  * PlayerList initialize
  */
-var bots = {};
+var userList = {};
 var logsOnUser = {};
 var logs = [];
+
+var getAllBots = function(user=null, callback) {
+    callback(db.listCode(user));
+}
+
+var saveUserCode = function(user, name, code) {
+    db.saveCode(user, name, code);
+}
 
 // Load Static File
 app.use(require('koa-static')("../public"));
 
 var getCredential = (socketID) => {
-    return socketID.substr(0, 6);
+    return userList[socketID] ?
+               userList[socketID].name :
+               null;
+}
+
+var loginUser = (user, passwd, callback) => {
+    db.checkUser(user, passwd, info => {
+        callback(info);
+    });
 }
 
 // Socketio Functions
 io.on('connection', socket => {
 
     if (VERBOSE) console.log("[System] " + socket.id + ": Login.");
+    userList[socket.id] = null;
 
-    socket.on('login', () => {
+    socket.on('login', cred => {
 
-        let user = getCredential(socket.id);
-        if (!bots[user]) bots[user] = {};
-        if (user) 
-            socket.emit("updateLogin", user);
-        else
-            socket.emit("updateLogin", false);
+        cred.user = cred.user || "";
+        cred.passwd = cred.passwd || "";
+
+        loginUser(cred.user, cred.passwd, info => {
+            if (info.error) {
+                // Login Incorrect
+                socket.emit("updateLogin", false);
+            } else {
+                // Login Success
+                userList[socket.id] = info;
+                socket.emit("updateLogin", info);
+            }
+        });
 
     });
     
     socket.on("getPlayerList", () => {
 
         if (VERBOSE) console.log("[System] Get playerList for " + getCredential(socket.id) + `.`);
-        if (getCredential(socket.id)) {
-            socket.emit("updatePlayerList", bots);
+        
+        let user = getCredential(socket.id);
+        if (user) {
+            getAllBots(null, (allBots) => {
+                getAllBots(user, (myBots) => {
+                    botList = allBots;
+                    botList[user] = myBots;
+                    socket.emit("updatePlayerList", botList);
+                });
+            });
         }
 
     });
@@ -53,12 +87,13 @@ io.on('connection', socket => {
         if (getCredential(socket.id)) {
 
             if (VERBOSE) console.log("[System] Get code for " + codeInfo.playerName + `:` + codeInfo.name + `.`);
+            
             socket.emit("updatePlayerCode", {
                 playerName: codeInfo.playerName,
                 name: codeInfo.name || codeInfo.playerName,
                 code: codeInfo.name ? 
-                        bots[codeInfo.playerName][codeInfo.name] : 
-                        bots[codeInfo.playerName][Object.keys(bots[codeInfo.playerName])[0]]
+                        db.readCode(codeInfo.playerName, codeInfo.name):
+                        db.readCode(codeInfo.playerName, codeInfo.playerName)
             });
         }
 
@@ -70,8 +105,8 @@ io.on('connection', socket => {
         if (user) {
 
             if (VERBOSE) console.log("[System] Saved code for " + getCredential(socket.id) + `:` + codeFile.name + `.`);
-            if (!bots[user]) bots[user] = {};
-            bots[user][codeFile.name] = codeFile.code;
+            
+            saveUserCode(user, codeFile.name, codeFile.code);
             socket.emit("savedCode", true);
 
         }
@@ -102,8 +137,8 @@ io.on('connection', socket => {
     socket.on('disconnect', () => {
 
         let user = getCredential(socket.id);
-        if (!bots[user]) return;
-        if (Object.keys(bots[user]).length == 0) delete bots[user];
+
+        if (userList[socket.id]) delete userList[socket.id];
         if (VERBOSE) console.log("[System] " + socket.id + `: Disconnect.`);
 
     });

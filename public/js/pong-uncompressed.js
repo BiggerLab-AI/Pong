@@ -29,6 +29,26 @@ Blockly.Blocks['ball_ontheright'] = {
     }
 };
 
+Blockly.Blocks['get_estimate_hit_time'] = {
+    init: function() {
+        this.appendDummyInput()
+            .appendField(new Blockly.FieldLabel('Get Estimate Hit Time'));
+        this.setOutput(true, 'Number');
+        this.setColour(260);
+        this.setTooltip('Returns the estimated time of hit.');
+    }
+};
+
+Blockly.Blocks['get_predict_ball_target_x'] = {
+    init: function() {
+        this.appendDummyInput()
+            .appendField(new Blockly.FieldLabel('Get Predict Ball Target X'));
+        this.setOutput(true, 'Number');
+        this.setColour(260);
+        this.setTooltip('Returns the predicted X axis of the destination of the ball.');
+    }
+};
+
 Blockly.Blocks['my_x'] = {
     init: function() {
         this.appendDummyInput()
@@ -133,6 +153,14 @@ Blockly.JavaScript['ball_ontheleft'] = function(block) {
 
 Blockly.JavaScript['ball_ontheright'] = function(block) {
     return ['pack.ball[0] > pack.player[0] + pack.board', Blockly.JavaScript.ORDER_MEMBER];
+};
+
+Blockly.JavaScript['get_estimate_hit_time'] = function(block) {
+    return ['window.getEstimateHitTime(pack)', Blockly.JavaScript.ORDER_MEMBER];
+};
+
+Blockly.JavaScript['get_predict_ball_target_x'] = function(block) {
+    return [`window.getPreditBallTargetX(pack)`, Blockly.JavaScript.ORDER_MEMBER];
 };
 
 Blockly.JavaScript['my_x'] = function(block) {
