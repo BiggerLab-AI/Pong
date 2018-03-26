@@ -3,8 +3,8 @@ const MongoClient = require('mongodb').MongoClient,
       request     = require('request'),
       fs          = require('fs');
 
-const MongoUrl = "";
-const MongoDBName  = "";
+const MongoUrl = process.env.MONGOURL || "";
+const MongoDBName  = MongoUrl.substr(MongoUrl.lastIndexOf("/") + 1);
 
 var defaultCallback = (db, cb) => {cb();};
 
@@ -16,6 +16,61 @@ var dbConnect = function(callback = defaultCallback) {
         });
     });
 };
+
+var getScoreList = function(limit = 10, callback) {
+    dbConnect((db, after) => {
+        let col = db.collection("pong.leaderboard");
+         col.find().sort({score: -1}).limit(limit)
+            .toArray(function(err, result) {
+                callback(result);
+                after();
+            });
+    });
+}
+
+var getScore = function(user, callback) {
+    dbConnect((db, after) => {
+        let col = db.collection("pong.leaderboard");
+         col.find({user: user})
+            .toArray(function(err, result) {
+                if (result.length) {
+                    callback(result.score);
+                } else {
+                    callback(0);
+                }
+                after();
+            });
+    });
+}
+
+var updateScore = function(user, score=0, callback) {
+    dbConnect((db, after) => {
+        let col = db.collection("pong.leaderboard");
+         col.find({user: user})
+            .toArray(function(err, result) {
+                let lastScore = 0;
+                if (result.length) {
+                    lastScore = result.score;
+                }
+                if (lastScore < score) {
+                    col.updateOne({user: user}, {$set: {score: score} }, function(err, result) {
+                        if (result.result.nModified) {
+                            callback(score);
+                            after();
+                        } else {
+                            col.insertOne({user: user, score: score}, function(err, res) {
+                                callback(score);
+                                after();
+                            });
+                        }
+                    });
+                } else {
+                    callback(lastScore);
+                    after();
+                }
+            });
+    });
+}
 
 var localize = function (word) {
     word = word.replace("\\", "");
@@ -76,7 +131,10 @@ var checkUser = function(urname, passwd, callback=() => {}) {
     });
 }
 
-exports.checkUser = checkUser;
-exports.saveCode  = saveCode;
-exports.readCode  = readCode;
-exports.listCode  = listCode;
+exports.checkUser    = checkUser;
+exports.saveCode     = saveCode;
+exports.readCode     = readCode;
+exports.listCode     = listCode;
+exports.getScore     = getScore;
+exports.updateScore  = updateScore;
+exports.getScoreList = getScoreList;
