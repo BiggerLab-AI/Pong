@@ -55,12 +55,11 @@ body {
     padding-top: 53px;
 }
 
-#panel {
+#panel, #score {
     position: fixed;
     display: block;
     width: 0px;
     height: 0px;
-    top: 20px;
     right: 10px;
     background: #444;
     z-index: 100;
@@ -73,27 +72,35 @@ body {
     font-variant: small-caps;
 }
 
-#panel .scroller {
+#panel {
+    top: 20px;
+}
+
+#score {
+    bottom: 20px;
+}
+
+#panel .scroller, #score .scroller {
     width: 100%;
     height: 100%;
     overflow-x: hidden;
     overflow-y: scroll;
 }
 
-#panel span {
+#panel span, #score span {
     display: block;
     background-color: #444;
     margin-bottom: 10px;
 }
 
-#panel:hover {
+#panel:hover, #score:hover {
     width: 206px;
-    height: 400px;
-    padding: 10px 10px;
-    padding-top: 53px;
 }
 
-#panel span::after {
+#panel:hover { height: 400px; padding: 10px 10px; padding-top: 53px; }
+#score:hover { height: 300px; padding: 20px 10px; padding-bottom: 53px; }
+
+#panel span::after, #score span::after {
     display: block;
     width: 100%;
     border-bottom: 1px #666 solid;
@@ -119,4 +126,17 @@ body {
     color: #FFF;
     padding: 4px 8px;
     font-variant: small-caps;
+}
+
+#scoreBtn.submit {
+    top: calc(100% - 60px);
+    right: 20px;
+    width: 140px;
+}
+
+#scoreBtn:hover +#score{
+    width: 206px;
+    height: 300px;
+    padding: 20px 10px;
+    padding-bottom: 53px;
 }

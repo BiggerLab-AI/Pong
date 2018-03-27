@@ -27,6 +27,8 @@
     const $loginpass = document.getElementById("loginpass");
     const $loginsubmit = document.getElementById("loginsubmit");
     const $userpanel = document.getElementById("userpanel");
+    const $myScore = document.getElementById("myScore");
+    const $leaderBoard = document.getElementById("leaderBoard");
 
     socket.on("updateLogin", userInfo => {
 
@@ -43,9 +45,12 @@
             $userpanel.innerHTML = `<p>Welcome: ${window.playerName}</p>`;
 
             socket.emit("getPlayerList");
+            socket.emit("getScore");
         }
 
     });
+
+    // socket.emit("updateScore", n);
 
     socket.on("updatePlayerList", playerList => {
 
@@ -96,6 +101,18 @@
         
         // Update View
 
+    });
+
+    socket.on("updateScore", score => {
+        $myScore.innerHTML = score;
+    });
+
+    socket.on("updateScores", scoreList => {
+        let html = "";
+        for (let i = 0; i < scoreList.length; i++) {
+            html += `<p>${i+1}. ${scoreList[i].user}: ${scoreList[i].score}</p>`
+        }
+        $leaderBoard.innerHTML = html;
     });
 
     /**
@@ -151,5 +168,7 @@
             }
         }
     }
+
+    socket.emit("getScores");
 
 }());

@@ -34,7 +34,7 @@ var getScore = function(user, callback) {
          col.find({user: user})
             .toArray(function(err, result) {
                 if (result.length) {
-                    callback(result.score);
+                    callback(result[0].score);
                 } else {
                     callback(0);
                 }
@@ -50,7 +50,7 @@ var updateScore = function(user, score=0, callback) {
             .toArray(function(err, result) {
                 let lastScore = 0;
                 if (result.length) {
-                    lastScore = result.score;
+                    lastScore = result[0].score;
                 }
                 if (lastScore < score) {
                     col.updateOne({user: user}, {$set: {score: score} }, function(err, result) {

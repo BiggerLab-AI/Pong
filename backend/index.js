@@ -136,6 +136,41 @@ io.on('connection', socket => {
 
     });
 
+    socket.on("getScores", () => {
+        
+        // if (getCredential(socket.id)) {
+            if (VERBOSE) console.log("[System] Get ScoresList.");
+            db.getScoreList(10, (res) => {
+                socket.emit("updateScores", res);
+            });
+        // }
+
+    });
+
+    socket.on("getScore", () => {
+        
+        let user = getCredential(socket.id);
+        if (user) {
+            if (VERBOSE) console.log("[System] Get Score for " + getCredential(socket.id) + `.`);
+            db.getScore(user, (score) => {
+                socket.emit("updateScore", score);
+            });
+        }
+
+    });
+
+    socket.on("updateScore", (score) => {
+        
+        let user = getCredential(socket.id);
+        if (user) {
+            if (VERBOSE) console.log("[System] Update Score for " + getCredential(socket.id) + `.`);
+            db.updateScore(user, score, (updatedScore) => {
+                socket.emit("updateScore", updatedScore);
+            });
+        }
+
+    });
+
     socket.on('disconnect', () => {
 
         let user = getCredential(socket.id);
