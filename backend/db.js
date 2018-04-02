@@ -53,8 +53,8 @@ var updateScore = function(user, score=0, callback) {
                     lastScore = result[0].score;
                 }
                 if (lastScore < score) {
-                    col.updateOne({user: user}, {$set: {score: score} }, function(err, result) {
-                        if (result.result.nModified) {
+                    col.updateOne({user: user}, {$set: {score: score} }, function(err, result2) {
+                        if (result2.result.nModified) {
                             callback(score);
                             after();
                         } else {
