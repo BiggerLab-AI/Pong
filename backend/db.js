@@ -17,6 +17,34 @@ var dbConnect = function(callback = defaultCallback) {
     });
 };
 
+var getHistoryList = function(user, limit = 10, callback) {
+    dbConnect((db, after) => {
+        let col = db.collection(`pong.history.${user}`);
+         col.find().sort({time: -1}).limit(limit)
+            .toArray(function(err, result) {
+                callback(result);
+                after();
+            });
+    });
+}
+
+// user  发起人
+// with  接受人
+// enemy 敌人
+var updateHistory = function(user1, user2, winner, seed=5, callback) {
+    dbConnect((db, after) => {
+        let col = db.collection(`pong.history.${user1}`);
+        let currentTime = (new Date()).getTime();
+        col.insertOne({user: user1, with: user2, enemy: user2, seed: seed, winner: winner, time: currentTime}, function(err, res) {
+            let col2 = db.collection(`pong.history.${user2}`);
+            col2.insertOne({user: user1, with: user2, enemy: user1, seed: seed, winner: winner, time: currentTime}, function(err, res) {
+                callback(true);
+                after();
+            });
+        });
+    });
+}
+
 var getScoreList = function(limit = 10, callback) {
     dbConnect((db, after) => {
         let col = db.collection("pong.leaderboard");
@@ -131,10 +159,12 @@ var checkUser = function(urname, passwd, callback=() => {}) {
     });
 }
 
-exports.checkUser    = checkUser;
-exports.saveCode     = saveCode;
-exports.readCode     = readCode;
-exports.listCode     = listCode;
-exports.getScore     = getScore;
-exports.updateScore  = updateScore;
-exports.getScoreList = getScoreList;
+exports.checkUser      = checkUser;
+exports.saveCode       = saveCode;
+exports.readCode       = readCode;
+exports.listCode       = listCode;
+exports.getScore       = getScore;
+exports.updateScore    = updateScore;
+exports.getScoreList   = getScoreList;
+exports.getHistoryList = getHistoryList;
+exports.updateHistory  = updateHistory;

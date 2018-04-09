@@ -171,6 +171,32 @@ io.on('connection', socket => {
 
     });
 
+    socket.on("updateHistory", (his) => {
+        
+        let user = getCredential(socket.id);
+        if (user) {
+            if (VERBOSE) console.log("[System] Update History for " + getCredential(socket.id) + `.`);
+            db.updateHistory(user, his.enemy, his.winner, his.seed, result => {
+                db.getHistoryList(user, 10, list => {
+                    socket.emit("updateHistory", list);
+                });
+            });
+        }
+
+    });
+
+    socket.on("getHistory", () => {
+        
+        let user = getCredential(socket.id);
+        if (user) {
+            if (VERBOSE) console.log("[System] Get History for " + getCredential(socket.id) + `.`);
+            db.getHistoryList(user, 10, list => {
+                socket.emit("updateHistory", list);
+            });
+        }
+
+    });
+
     socket.on('disconnect', () => {
 
         let user = getCredential(socket.id);
