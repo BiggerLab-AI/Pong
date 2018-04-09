@@ -32,12 +32,14 @@ var getHistoryList = function(user, limit = 10, callback) {
 // with  接受人
 // enemy 敌人
 var updateHistory = function(user1, user2, winner, seed=5, callback) {
+    let snap1 = readCode(user1, user1).snap;
+    let snap2 = readCode(user2, user2).snap;
     dbConnect((db, after) => {
         let col = db.collection(`pong.history.${user1}`);
         let currentTime = (new Date()).getTime();
-        col.insertOne({user: user1, with: user2, enemy: user2, seed: seed, winner: winner, time: currentTime}, function(err, res) {
+        col.insertOne({user: user1, with: user2, snap1: snap1, snap2: snap2, enemy: user2, seed: seed, winner: winner, time: currentTime}, function(err, res) {
             let col2 = db.collection(`pong.history.${user2}`);
-            col2.insertOne({user: user1, with: user2, enemy: user1, seed: seed, winner: winner, time: currentTime}, function(err, res) {
+            col2.insertOne({user: user1, with: user2, snap1: snap1, snap2: snap2, enemy: user1, seed: seed, winner: winner, time: currentTime}, function(err, res) {
                 callback(true);
                 after();
             });
@@ -111,17 +113,37 @@ var localize = function (word) {
 var saveCode = function (user, name, code) {
     user = localize(user);
     name = localize(name);
+    let time = (new Date()).getTime();
     if (!fs.existsSync(`./code/${user}`)) fs.mkdirSync(`./code/${user}`);
     fs.writeFileSync(`./code/${user}/${name}.js.code`, code);
     fs.writeFileSync(`./code/${user}/${user}.js.code`, code);
+    if (!fs.existsSync(`./code/${user}/snapshot`)) fs.mkdirSync(`./code/${user}/snapshot`);
+    fs.writeFileSync(`./code/${user}/snapshot/${user}-${time}.js.code`, code);
+    fs.writeFileSync(`./code/${user}/${name}.js.snapshot`, `${time}`);
+    fs.writeFileSync(`./code/${user}/${user}.js.snapshot`, `${time}`);
 }
 
-var readCode = function (user, name) {
+var readCode = function (user, name, snapshot="") {
     user = localize(user);
     name = localize(name);
+    snap = localize(`${snapshot}`);
     if (!fs.existsSync(`./code/${user}`)) return "";
     if (!fs.existsSync(`./code/${user}/${name}.js.code`)) return "";
-    return fs.readFileSync(`./code/${user}/${name}.js.code`).toString();
+    if (!fs.existsSync(`./code/${user}/${name}.js.snapshot`)) return "";
+    if (!snap) {
+        return {
+            code: fs.readFileSync(`./code/${user}/${name}.js.code`).toString(),
+            snap: fs.readFileSync(`./code/${user}/${name}.js.snapshot`).toString()
+        }
+    } else {
+        if (!fs.existsSync(`./code/${user}/snapshot`)) return "";
+        if (!fs.existsSync(`./code/${user}/snapshot/${user}-${snapshot}.js.code`)) return "";
+        return {
+            code: fs.readFileSync(`./code/${user}/snapshot/${user}-${snapshot}.js.code`).toString(),
+            snap: snap
+        }
+    }
+    
 }
 
 var listCode = function (user=null) {
@@ -132,6 +154,8 @@ var listCode = function (user=null) {
     let res = {};
     for (let i = 0; i < list.length; i++) {
         if (list[i].indexOf(".") != 0) {
+            if (list[i] == "snapshot") continue;
+            if (list[i].endsWith(".js.snapshot")) continue;
             if (user && `${user}.js.code` == list[i]) continue;
             res[list[i].replace(".js.code", "")] = 1;
         }

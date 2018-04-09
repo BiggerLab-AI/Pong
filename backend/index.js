@@ -90,12 +90,35 @@ io.on('connection', socket => {
 
             if (VERBOSE) console.log("[System] Get code for " + codeInfo.playerName + `:` + codeInfo.name + `.`);
             
+            let codeGet = codeInfo.name ? 
+                            db.readCode(codeInfo.playerName, codeInfo.name):
+                            db.readCode(codeInfo.playerName, codeInfo.playerName);
             socket.emit("updatePlayerCode", {
                 playerName: codeInfo.playerName,
                 name: codeInfo.name || codeInfo.playerName,
-                code: codeInfo.name ? 
-                        db.readCode(codeInfo.playerName, codeInfo.name):
-                        db.readCode(codeInfo.playerName, codeInfo.playerName)
+                code: codeGet.code,
+                snap: codeGet.snap,
+                seed: parseInt(Math.random() * 1e6)
+            });
+        }
+
+    });
+
+    socket.on("getPlayerCodeSnap", codeInfo => {
+
+        if (getCredential(socket.id)) {
+
+            if (VERBOSE) console.log("[System] Get snap code for " + codeInfo.playerName + `:` + codeInfo.name + `.`);
+            
+            let codeGet = codeInfo.name ? 
+                            db.readCode(codeInfo.playerName, codeInfo.name, codeInfo.snap):
+                            db.readCode(codeInfo.playerName, codeInfo.playerName, codeInfo.snap);
+            socket.emit("updatePlayerCodeSnap", {
+                playerName: codeInfo.playerName,
+                name: codeInfo.name || codeInfo.playerName,
+                code: codeGet.code,
+                snap: codeGet.snap,
+                seed: codeInfo.seed
             });
         }
 
