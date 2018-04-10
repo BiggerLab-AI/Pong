@@ -19,40 +19,29 @@
      * Initialize Submit Button
      */
     var workspace;
-    const $submit_stupid = document.getElementById("submit_stupid"); 
-    const $submit_simple = document.getElementById("submit_simple");    
-    const $submit_jerry = document.getElementById("submit_jerry");
 
-    $submit_stupid.onclick = function () {
-        window.enemyAI = window._aiStupid;
-        window.submitCode();
-    };
-
-    $submit_simple.onclick = function () {
-        window.enemyAI = window._aiSimple;
-        window.submitCode();
-    };
-
-    $submit_jerry.onclick = function () {
-        window.enemyAI = window._aiJerry;
-        window.submitCode();
-    };
-
-    window.submitCode = function () {
+    window.submitCode = function (seed=5, callback=()=>{}) {
         if (!blocklyMode) {
             window.playerCode = editor.getValue();
         } else {
             window.playerCode = 'function (pack) {' + Blockly.JavaScript.workspaceToCode(workspace) + '}';
         }
         window.saveCodeLocally(window.playerCode);
-        eval("window.playerAI = " + window.playerCode);
-        window.restartGame();
+
+        try {
+            eval("window.playerAI = " + window.playerCode);
+        } catch (error) {
+            alert("Your Code has Error! Please Check!");
+        }
+        
+        window.restartGame(seed, callback);
     };
 
     var blocklyMode = true;
     const $switch = document.getElementById("switch");
-    $switch.onclick = function () {
-        blocklyMode = !blocklyMode;
+    $switch.onclick = function (event) {
+        if (!event) blocklyMode = false;
+        else blocklyMode = !blocklyMode;
         if (blocklyMode) {
             $blockly.classList.add("show");
             $editor.classList.remove("show");
@@ -103,4 +92,7 @@
     }
     `);
     editor.moveCursorTo(0, 0);
+
+    // document.querySelector("rect.blocklyMainBackground").style = "";
+    // document.querySelector("div.blocklyToolboxDiv").style.background="#222";
 })();

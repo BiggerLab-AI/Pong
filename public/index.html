@@ -8,6 +8,9 @@
 </head>
 
 <body>
+    <!-- <div class="nav">
+        <h1>Pong AI Platform</h1>
+    </div> -->
     <div class="container">
         <div id="viewer"></div>
         <div id="editor"></div>
@@ -429,6 +432,7 @@
         </block>
     </xml>
 
+    <button class="submit" style="right: 250px; background: #DDD; color: #333;" id="replay" onclick="window.restartGame()">Replay</button>
     <button class="submit" style="right: 130px" id="switch">Switch</button>
     <button class="submit" id="panelBtn">Panel</button>
     <div id="panel">
@@ -455,10 +459,14 @@
     </div>
     <button class="submit" id="scoreBtn">LeaderBoard</button>
     <div id="score">
-        <span>MyScore</span>
-        <p id="myScore">0</p>
-        <span>Leader Board</span>
-        <list id="leaderBoard"></list>
+        <div class="scroller">
+            <span>MyScore</span>
+            <p id="myScore">0</p>
+            <span>Leader Board</span>
+            <list id="leaderBoard"></list>
+            <span>Play Log</span>
+            <list id="logList"></list>
+        </div>
     </div>
 
     <script src="./js/blockly_compressed.js"></script>

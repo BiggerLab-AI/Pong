@@ -1,5 +1,6 @@
 body {
     margin: 0;
+    background: #333;
 }
 .container {
     display: inline-block;
@@ -48,7 +49,7 @@ body {
     opacity: .8;
 }
 
-#panelBtn:hover +#panel{
+#panelBtn:hover +#panel, #switch:hover ~#panel{
     width: 206px;
     height: 400px;
     padding: 10px 10px;
@@ -98,7 +99,7 @@ body {
 }
 
 #panel:hover { height: 400px; padding: 10px 10px; padding-top: 53px; }
-#score:hover { height: 300px; padding: 20px 10px; padding-bottom: 53px; }
+#score:hover { height: 300px; padding: 20px 10px; } /* padding-bottom: 53px; } */
 
 #panel span::after, #score span::after {
     display: block;
@@ -107,7 +108,7 @@ body {
     content: '';
 }
 
-#panel .submit {
+#panel .submit, #score .submit {
     position: relative;
     width: 100%;
     top: 0px;
@@ -132,11 +133,12 @@ body {
     top: calc(100% - 60px);
     right: 20px;
     width: 140px;
+    z-index: 0;
 }
 
 #scoreBtn:hover +#score{
     width: 206px;
     height: 300px;
     padding: 20px 10px;
-    padding-bottom: 53px;
+    /* padding-bottom: 53px; */
 }
