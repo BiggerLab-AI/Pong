@@ -24,7 +24,7 @@
         if (!blocklyMode) {
             window.playerCode = editor.getValue();
         } else {
-            window.playerCode = 'function (pack) {' + Blockly.JavaScript.workspaceToCode(workspace) + '}';
+            window.playerCode = 'function (currentState, actionSpace) {' + Blockly.JavaScript.workspaceToCode(workspace) + '}';
         }
         window.saveCodeLocally(window.playerCode);
 
@@ -66,29 +66,30 @@
     editor.setTheme("ace/theme/twilight");
     editor.setValue(window.getCodeLocally() || `
     /**
-     * There are 5 objects in pack
+     * There are 5 objects in currentState
      * 
      * ball, enemy, player are lists with 2 elements:
-     *  - pack.ball[0] means the x axis of the ball
-     *  - pack.ball[1] means the y axis of the ball
+     *  - currentState.ball[0] means the x axis of the ball
+     *  - currentState.ball[1] means the y axis of the ball
      * board[0] indicates the length of player's board:
-     *  - pack.board[0]
+     *  - currentState.board[0]
      * board[1] indicates the length of enemy's board:
-     *  - pack.board[1]
+     *  - currentState.board[1]
      * speed indicates the velocity of the ball:
-     *  - pack[0] - vertical
-     *  - pack[1] - horizontal
+     *  - currentState[0] - vertical
+     *  - currentState[1] - horizontal
      * 
-     * The return value should between -1 and 1, deciding the horizontal velocity of player's board:
-     *  - return -1    means to scroll left with full spead
-     *  - return 0     means to stop
-     *  - return 0.5   means to scroll right with half spead
+     * There are 3 methods in actionSpace
+     *  - actionSpace.moveLeft()
+     *  - actionSpace.moveRight()
+     *  - actionSpace.stop()
+     * To Control the Board.
      */
     
-    function (pack) {
-        if (pack.ball[0] < pack.player[0]) return -1;
-        else if (pack.ball[0] > pack.player[0] + pack.board[0]) return 1;
-        else return 0;
+    function (currentState, actionSpace) {
+        if (currentState.ball[0] < currentState.player[0]) actionSpace.moveLeft();
+        else if (currentState.ball[0] > currentState.player[0] + currentState.board[0]) actionSpace.moveRight();
+        else actionSpace.stop();
     }
     `);
     editor.moveCursorTo(0, 0);

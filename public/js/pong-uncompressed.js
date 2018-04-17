@@ -9,6 +9,46 @@ Blockly.Blocks['return'] = {
     }
 };
 
+Blockly.Blocks['moveleft'] = {
+    init: function() {
+        this.appendDummyInput()
+            .appendField(new Blockly.FieldLabel('Move Left'));
+        this.setPreviousStatement(true, 'Action');
+        this.setColour(300);
+        this.setTooltip('Move Left.');
+    }
+};
+
+Blockly.Blocks['moveright'] = {
+    init: function() {
+        this.appendDummyInput()
+            .appendField(new Blockly.FieldLabel('Move Right'));
+        this.setPreviousStatement(true, 'Action');
+        this.setColour(300);
+        this.setTooltip('Move Right.');
+    }
+};
+
+Blockly.Blocks['movestop'] = {
+    init: function() {
+        this.appendDummyInput()
+            .appendField(new Blockly.FieldLabel('Stop'));
+        this.setPreviousStatement(true, 'Action');
+        this.setColour(300);
+        this.setTooltip('Stop the board.');
+    }
+};
+
+Blockly.Blocks['mid_of_board'] = {
+    init: function() {
+        this.appendDummyInput()
+            .appendField(new Blockly.FieldLabel('Position of Board'));
+        this.setOutput(true, 'Number');
+        this.setColour(260);
+        this.setTooltip('Returns the Position of Board.');
+    }
+};
+
 Blockly.Blocks['ball_ontheleft'] = {
     init: function() {
         this.appendDummyInput()
@@ -147,54 +187,70 @@ Blockly.JavaScript['return'] = function(block) {
     return 'return ' + argument0 + ';\n';
 };
 
+Blockly.JavaScript['moveleft'] = function(block) {
+    return 'actionSpace.moveLeft();\n';
+};
+
+Blockly.JavaScript['moveright'] = function(block) {
+    return 'actionSpace.moveRight();\n';
+};
+
+Blockly.JavaScript['movestop'] = function(block) {
+    return 'actionSpace.stop();\n';
+};
+
+Blockly.JavaScript['mid_of_board'] = function(block) {
+    return ['currentState.player[0] + currentState.board[0] / 2', Blockly.JavaScript.ORDER_MEMBER];
+};
+
 Blockly.JavaScript['ball_ontheleft'] = function(block) {
-    return ['pack.ball[0] < pack.player[0]', Blockly.JavaScript.ORDER_MEMBER];
+    return ['currentState.ball[0] < currentState.player[0]', Blockly.JavaScript.ORDER_MEMBER];
 };
 
 Blockly.JavaScript['ball_ontheright'] = function(block) {
-    return ['pack.ball[0] > pack.player[0] + pack.board', Blockly.JavaScript.ORDER_MEMBER];
+    return ['currentState.ball[0] > currentState.player[0] + currentState.board', Blockly.JavaScript.ORDER_MEMBER];
 };
 
 Blockly.JavaScript['get_estimate_hit_time'] = function(block) {
-    return ['window.getEstimateHitTime(pack)', Blockly.JavaScript.ORDER_MEMBER];
+    return ['window.getEstimateHitTime(currentState)', Blockly.JavaScript.ORDER_MEMBER];
 };
 
 Blockly.JavaScript['get_predict_ball_target_x'] = function(block) {
-    return [`window.getPreditBallTargetX(pack)`, Blockly.JavaScript.ORDER_MEMBER];
+    return [`window.getPreditBallTargetX(currentState)`, Blockly.JavaScript.ORDER_MEMBER];
 };
 
 Blockly.JavaScript['my_x'] = function(block) {
-    return ['pack.player[0]', Blockly.JavaScript.ORDER_MEMBER];
+    return ['currentState.player[0]', Blockly.JavaScript.ORDER_MEMBER];
 };
 
 Blockly.JavaScript['my_y'] = function(block) {
-    return ['pack.player[1]', Blockly.JavaScript.ORDER_MEMBER];
+    return ['currentState.player[1]', Blockly.JavaScript.ORDER_MEMBER];
 };
 
 Blockly.JavaScript['enemy_x'] = function(block) {
-    return ['pack.enemy[0]', Blockly.JavaScript.ORDER_MEMBER];
+    return ['currentState.enemy[0]', Blockly.JavaScript.ORDER_MEMBER];
 };
 
 Blockly.JavaScript['enemy_y'] = function(block) {
-    return ['pack.enemy[1]', Blockly.JavaScript.ORDER_MEMBER];
+    return ['currentState.enemy[1]', Blockly.JavaScript.ORDER_MEMBER];
 };
 
 Blockly.JavaScript['ball_x'] = function(block) {
-    return ['pack.ball[0]', Blockly.JavaScript.ORDER_MEMBER];
+    return ['currentState.ball[0]', Blockly.JavaScript.ORDER_MEMBER];
 };
 
 Blockly.JavaScript['ball_y'] = function(block) {
-    return ['pack.ball[1]', Blockly.JavaScript.ORDER_MEMBER];
+    return ['currentState.ball[1]', Blockly.JavaScript.ORDER_MEMBER];
 };
 
 Blockly.JavaScript['ball_speed_x'] = function(block) {
-    return ['pack.speed[0]', Blockly.JavaScript.ORDER_MEMBER];
+    return ['currentState.speed[0]', Blockly.JavaScript.ORDER_MEMBER];
 };
 
 Blockly.JavaScript['ball_speed_y'] = function(block) {
-    return ['pack.speed[1]', Blockly.JavaScript.ORDER_MEMBER];
+    return ['currentState.speed[1]', Blockly.JavaScript.ORDER_MEMBER];
 };
 
 Blockly.JavaScript['board_length'] = function(block) {
-    return ['pack.board[0]', Blockly.JavaScript.ORDER_MEMBER];
+    return ['currentState.board[0]', Blockly.JavaScript.ORDER_MEMBER];
 };

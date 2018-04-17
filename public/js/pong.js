@@ -1,5 +1,32 @@
 (function() {
 
+    class Actions {
+
+        __construct(player) {
+            this.player = player;
+        }
+
+        moveLeft(value=1) {
+            value = parseFloat(value);
+            if (isNaN(value)) value = 0;
+            value = value > 1 ? 1 : ( value < 0 ? 0 : value );
+            return movePlayer(this, -value);
+        }
+
+        moveRight(value=1) {
+            value = parseFloat(value);
+            if (isNaN(value)) value = 0;
+            value = value > 1 ? 1 : ( value < 0 ? 0 : value );
+            return movePlayer(this, value);
+        }
+
+        stop() {
+            return movePlayer(this, 0);
+        }
+
+    }
+
+
     /**
      * Scaling of the game
      * for the game size is to be
@@ -61,6 +88,9 @@
     var points = [0, 0];
     var finishCallback = null;
     var allBricks = [];
+    var roundDecisions = { 0: [], 1: [] };
+    var playActions = { 0: null, 1: null };
+    var currentRound = 0;
 
 
     /**
@@ -307,6 +337,7 @@
             that.sound.play("hit-wall");
         }
         prevX = ball.body.velocity.x;
+        currentRound ++;
 
     }
 
@@ -320,10 +351,11 @@
         // Broadcasting informations to AI
         let player1 = null,
             player2 = null;
-        if (boardObject == player) { player1 = player; player2 = enemy; }
-        else { player2 = player; player1 = enemy; }
+        let role = 0;
+        if (boardObject == player) { role = 0; player1 = player; player2 = enemy; }
+        else { role = 1; player2 = player; player1 = enemy; }
 
-        let aiPack = {
+        let currentState = {
             "ball":   [ball.body.x   , ball.body.y   ],
             "player": [player1.body.x, player1.body.y],
             "enemy":  [player2.body.x, player2.body.y],
@@ -332,42 +364,38 @@
         }
 
         // Standardize the AI output
-        let res = parseFloat(fn(aiPack));
-        if (isNaN(res)) res = 0;
-        if (Math.abs(res) > 1) res = parseInt(res / Math.abs(res));
-
-        // Move according to instructions of AI
-        boardObject.setVelocityX(res * 300);
+        fn(currentState, playActions[role]);
 
     }
 
     /**
      * Default Built-in AI
-     * @param {*} pack 
+     * @param {*} currentState 
      */
-    window.enemyAI = window._aiSimple = function (pack) {
+    window.enemyAI = window._aiSimple = function (currentState, actionSpace) {
 
-        if (pack.ball[0] < pack.player[0]) return -1;
-        else if (pack.ball[0] > pack.player[0] + pack.board[0]) return 1;
-        else return 0;
+        if (currentState.ball[0] < currentState.player[0]) actionSpace.moveLeft();
+        else if (currentState.ball[0] > currentState.player[0] + currentState.board[0]) actionSpace.moveRight();
+        else actionSpace.stop();
 
     }
 
-    window._aiStupid = function(pack) {
-        return (0.5 - Math.random()) * 2;
+    window._aiStupid = function(currentState, actionSpace) {
+        if (Math.random() < 0.5) actionSpace.moveLeft();
+        else actionSpace.moveRight();
     }
 
-    window._aiJerry = function (pack) {
+    window._aiJerry = function (currentState, actionSpace) {
 
-        let me = pack.player;
-        let xOfBall = pack.ball[0];
+        let me = currentState.player;
+        let xOfBall = currentState.ball[0];
         let lOfBoard = me[0];
-        let rOfBoard = me[0] + pack.board[0];
+        let rOfBoard = me[0] + currentState.board[0];
         let midOfBoard = (lOfBoard + rOfBoard) / 2;
 
-        let yDistanceOfBall = Math.abs(pack.ball[1] - me[1]);
-        let xVelocityOfBall = pack.speed[0];
-        let yVelocityOfBall = pack.speed[1];
+        let yDistanceOfBall = Math.abs(currentState.ball[1] - me[1]);
+        let xVelocityOfBall = currentState.speed[0];
+        let yVelocityOfBall = currentState.speed[1];
 
         let playgroundWidth = 350;
         let deltaXDistanceOfBall = 0;
@@ -400,15 +428,15 @@
         if (lOfBoard + 5 < targetX && targetX < rOfBoard - 5) {
 
             // Doing Aggressive Mode
-            if (targetX < lOfBoard + 20) return 0.05;
-            else if (lOfBoard - 20 < targetX) return -0.05;
-            else return 0;
+            if (targetX < lOfBoard + 20) actionSpace.moveRight(0.05);
+            else if (lOfBoard - 20 < targetX) actionSpace.moveLeft(-0.05);
+            else return actionSpace.stop();
 
         } else {
 
             // Doing Conservative Mode
-            if (targetX < midOfBoard) return -1;
-            else return 1;
+            if (targetX < midOfBoard) actionSpace.moveLeft();
+            else actionSpace.moveRight();
 
         } 
 
@@ -527,6 +555,22 @@
 
     }
 
+    function movePlayer(actionOfPlayer, value) {
+        value = parseFloat(value);
+        if (isNaN(value)) value = 0;
+        value = value > 1 ? 1 : ( value < -1 ? -1 : value );
+        let role = 1; // Enemy
+        let board = enemy;
+        if (playActions[0] == actionOfPlayer) { role = 0; board = player; } // Player
+        if (roundDecisions[role][currentRound]) {
+            return roundDecisions[role][currentRound];
+        } else {
+            roundDecisions[role][currentRound] = value;
+            board.setVelocityX(value * 300);
+            return value;
+        }
+    }
+
     /**
      * The Seed Reset Function
      * @param {int} seed 
@@ -560,6 +604,9 @@
             allBricks[i].destroy();
         }
         allBricks = [];
+        roundDecisions = { 0: [], 1: [] };
+        playActions = { 0: new Actions(player), 1: new Actions(enemy) };
+        currentRound = 0;
         seed=resetRandomSeed(seed);
         that.create();
         prevX = 0;
@@ -578,19 +625,19 @@
     /**
      * Buitin Functions
      */
-    window.getEstimateHitTime = function(pack) {
-        let yDistanceOfBall = Math.abs(pack.ball[1] - pack.player[1]);
-        let yVelocityOfBall = pack.speed[1];
+    window.getEstimateHitTime = function(currentState) {
+        let yDistanceOfBall = Math.abs(currentState.ball[1] - currentState.player[1]);
+        let yVelocityOfBall = currentState.speed[1];
         return Math.ceil(Math.abs(yDistanceOfBall / yVelocityOfBall));
     }
     
-    window.getPreditBallTargetX = function(pack) {
-        let me = pack.player;
-        let xOfBall = pack.ball[0];
+    window.getPreditBallTargetX = function(currentState) {
+        let me = currentState.player;
+        let xOfBall = currentState.ball[0];
 
-        let yDistanceOfBall = Math.abs(pack.ball[1] - me[1]);
-        let xVelocityOfBall = pack.speed[0];
-        let yVelocityOfBall = pack.speed[1];
+        let yDistanceOfBall = Math.abs(currentState.ball[1] - me[1]);
+        let xVelocityOfBall = currentState.speed[0];
+        let yVelocityOfBall = currentState.speed[1];
 
         let playgroundWidth = 350;
         let deltaXDistanceOfBall = 0;

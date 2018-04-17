@@ -319,7 +319,13 @@
         <sep></sep>
         <category id="catVariables" colour="330" custom="VARIABLE" name="Variables"></category>
         <category id="catFunctions" colour="290" custom="PROCEDURE" name="Functions"></category>
-        <category name="Pong Variables">
+        <category name="Actions">
+            <block type="moveleft"></block>
+            <block type="moveright"></block>
+            <block type="movestop"></block>
+            <block type="return"></block>
+        </category>
+        <category name="Current Game States">
             <block type="my_x"></block>
             <block type="my_y"></block>
             <block type="enemy_x"></block>
@@ -331,104 +337,26 @@
             <block type="board_length"></block>
         </category>
         <category name="Pong Logic">
+            <block type="mid_of_board"></block>
             <block type="ball_ontheleft"></block>
             <block type="ball_ontheright"></block>
             <block type="get_estimate_hit_time"></block>
             <block type="get_predict_ball_target_x"></block>
         </category>
-        <category name="Return">
-            <block type="return"></block>
-        </category>
     </xml>
 
-    <!-- <xml id="demo" style="display: none">
-        <block type="controls_if" x="42" y="148">
-            <mutation elseif="1"></mutation>
-            <value name="IF0">
-                <block type="ball_ontheleft"></block>
-            </value>
-            <statement name="DO0">
-                <block type="return">
-                    <value name="VALUE">
-                        <block type="math_number">
-                            <field name="NUM">-1</field>
-                        </block>
-                    </value>
-                </block>
-            </statement>
-            <value name="IF1">
-                <block type="ball_ontheright"></block>
-            </value>
-            <statement name="DO1">
-                <block type="return">
-                    <value name="VALUE">
-                        <block type="math_number">
-                            <field name="NUM">1</field>
-                        </block>
-                    </value>
-                </block>
-            </statement>
-            <next>
-                <block type="return">
-                    <value name="VALUE">
-                        <block type="math_number">
-                            <field name="NUM">0</field>
-                        </block>
-                    </value>
-                </block>
-            </next>
-        </block>
-    </xml> -->
-
     <xml id="demo" style="display: none">
-        <block type="controls_if" id="mf0;NO5)y4T;rNl0E_(*" x="-4" y="118">
+        <block type="controls_if" id="mf0;NO5)y4T;rNl0E_(*" x="50" y="118">
+            <mutation else="1"></mutation>
             <value name="IF0">
                 <block type="logic_compare" id="hJ{=$Y%b8|H[x^;^yWp;">
                     <field name="OP">LT</field>
-                    <value name="A">
-                        <block type="ball_x" id="xDq2d[?I]f1qMRs+A-0f"></block>
-                    </value>
-                    <value name="B">
-                        <block type="math_arithmetic" id="FqAfUGSZ7NG|fiu|M[4S">
-                            <field name="OP">ADD</field>
-                            <value name="A">
-                                <block type="my_x" id="d{CKYNVN/c~$Wuqm[gQn"></block>
-                            </value>
-                            <value name="B">
-                                <block type="math_arithmetic" id="?(5Cs4u7$6hwuQM}60EQ">
-                                    <field name="OP">DIVIDE</field>
-                                    <value name="A">
-                                        <block type="board_length" id="bn{,5BWHaMWzTUXuEtQ:"></block>
-                                    </value>
-                                    <value name="B">
-                                        <block type="math_number" id="6z++2W)/NnsMjAfX*[:_">
-                                            <field name="NUM">2</field>
-                                        </block>
-                                    </value>
-                                </block>
-                            </value>
-                        </block>
-                    </value>
+                    <value name="A"><block type="ball_x" id="xDq2d[?I]f1qMRs+A-0f"></block></value>
+                    <value name="B"><block type="mid_of_board" id="FqAfUGSZ7NG|fiu|M[4S"></block></value>
                 </block>
             </value>
-            <statement name="DO0">
-                <block type="return" id="PwSq8Vj6ZTv9|/8bejg/">
-                    <value name="VALUE">
-                        <block type="math_number" id="9|%YxuFC*5WFQM2sKv~#">
-                            <field name="NUM">-1</field>
-                        </block>
-                    </value>
-                </block>
-            </statement>
-            <next>
-                <block type="return" id="OLrJGYdXjPm7Vp8(:Lx+">
-                    <value name="VALUE">
-                        <block type="math_number" id="dzsOlqCI_x]p{*f8##!h">
-                            <field name="NUM">1</field>
-                        </block>
-                    </value>
-                </block>
-            </next>
+            <statement name="DO0"><block type="moveleft" id="PwSq8Vj6ZTv9|/8bejg/"></block></statement>
+            <statement name="ELSE"><block type="moveright" id="OLrJGYdXjP27Vp8(:Lx+"></block></statement>
         </block>
     </xml>
 
