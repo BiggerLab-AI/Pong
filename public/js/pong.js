@@ -127,7 +127,7 @@
     window.playerCode = "";
 
     window.enemyName = "Computer";
-    window.playerName = "You";
+    window.playerName = "  You ";
 
     window.playerList = {};
     window.logList = {};
@@ -184,11 +184,7 @@
         playerDeadField.body.immovable = true;
 
         // Load Player Boards
-        if (window.botMode) {
-            player = this.physics.add.sprite(9 * SCALE / 2, 16 * SCALE - 20, 'paddle');
-        } else {
-            player = this.physics.add.sprite(9 * SCALE / 2, 16 * SCALE - 20, 'paddle-2');
-        }
+        player = this.physics.add.sprite(9 * SCALE / 2, 16 * SCALE - 20, 'paddle');
         enemy  = this.physics.add.sprite(9 * SCALE / 2, 20, 'paddle');
         player.setBounce(0);
         player.setCollideWorldBounds(true);
@@ -202,13 +198,13 @@
         stepper = this.physics.add.sprite(0, 16 * SCALE / 2, 'boundary');
 
         // Binding Keyboard
-        if (window.botMode) {
-            cursors = {
-                "left" : this.input.keyboard.addKey(37),
-                "right": this.input.keyboard.addKey(39),
-                "esc"  : this.input.keyboard.addKey(27),
-            }
+        // if (window.botMode) {
+        cursors = {
+            "left" : this.input.keyboard.addKey(37),
+            "right": this.input.keyboard.addKey(39),
+            "esc"  : this.input.keyboard.addKey(27),
         }
+        // }
 
         // Load Hint Texts
         gameText = this.add.text(9 * SCALE / 2 - 120, 16 * SCALE / 2 - 20, ' PAUSING  ', { fontSize: '32px', fill: '#FFF' });
@@ -440,6 +436,19 @@
 
         } 
 
+    }
+
+    window.changePlayMode = function() {
+        window.botMode = !window.botMode;
+        if (window.botMode) {
+            document.getElementById("botMode").innerHTML = "Mode: AI";
+            document.getElementById("botMode").style.background = "";
+            document.getElementById("botMode").style.color = "";
+        } else {
+            document.getElementById("botMode").innerHTML = "Mode: Player";
+            document.getElementById("botMode").style.background = "#DDD";
+            document.getElementById("botMode").style.color = "#333";
+        }
     }
 
     /**
